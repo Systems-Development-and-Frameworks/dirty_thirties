@@ -2,7 +2,7 @@
 
 [![Downloads](http://pepy.tech/badge/stronghold)](http://pepy.tech/count/stronghold)
 
-`dirty_thirties` is the homework team consisting of Nele, Sarah & Jenny.
+**dirty_thirties** is the homework team consisting of Nele, Sarah & Jenny.
 
 This README is created to share and publish our homework for Systems Development & Frameworks.
 
