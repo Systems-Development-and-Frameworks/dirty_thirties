@@ -6,6 +6,11 @@
 
 This README is created to share and publish our homework for Systems Development & Frameworks.
 
+![second pic](https://www.smartsheet.com/sites/default/files/styles/full_width_desktop/public/IC-System-Development-Lifecycle.jpg?itok=gQIZveEV)
+
+This pic gives a first impression on the topic we have to face this semester. 
+
+The following text is a blackbox text that will be filled out soon.
 To be continued ....
 
 **Usage**
