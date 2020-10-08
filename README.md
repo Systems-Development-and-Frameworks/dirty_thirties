@@ -1,13 +1,12 @@
-![stronghold logo](img/stronghold-logo-left.png)
+![front pic](https://media-exp1.licdn.com/dms/image/C4E1BAQEMT5lSuDrcow/company-background_10000/0?e=2159024400&v=beta&t=S6Z8EbaUn5iFIKD_zc3MuRzDJnsHSBowEo9g9e9t_1A)
 
 [![Downloads](http://pepy.tech/badge/stronghold)](http://pepy.tech/count/stronghold)
 
-`dirty_thiries` is the team consisting of 
-    Nele 
-    Sarah
-    Jenny
+`dirty_thirties` is the homework team consisting of Nele, Sarah & Jenny.
 
-This side is created to share our homework for Systems Development & Frameworks.
+This README is created to share and publish our homework for Systems Development & Frameworks.
+
+To be continued ....
 
 **Usage**
 ---
