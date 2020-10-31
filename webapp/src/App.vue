@@ -9,7 +9,10 @@
 <template>
   <div id="app">
     <h1>News List</h1>
-    <List id="li" :listItems='news'
+    <SortListButton
+    @sortorder="sortItems"
+    />
+    <List id="li" :list-items='news'
       v-on:delete-item='deleteItem($event)'
       v-on:update-item='updateItem($event)'
     ></List>
@@ -21,12 +24,14 @@
 <script>
 import  InputField  from './components/InputField'
 import  List  from './components/List'
+import SortListButton from './components/SortListButton'
 
 export default {
   name: 'App',
   components:{
     List,
-    InputField
+    InputField,
+    SortListButton
   },
   data: function () {
     return {
@@ -77,8 +82,14 @@ export default {
       this.sortItems();
     },
     //sorting of items 
-    sortItems: function() {
+    sortItems(sort="ascending") {
+      if (sort=="ascending"){
       this.news = [...this.news].sort((a,b) => (a.votes < b.votes) ? 1 : ((b.votes < a.votes) ? -1 : 0));
+      
+      }
+      else{
+        this.news = [...this.news].sort((a,b) => (a.votes > b.votes) ? 1 : ((b.votes > a.votes) ? -1 : 0));
+      }
     }
   },
   mounted: function() {
