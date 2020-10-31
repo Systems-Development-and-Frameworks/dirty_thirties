@@ -16,6 +16,7 @@
       v-on:update-item="$emit('update-item', $event)"
       >
     </ListItem>
+    <p v-if="listItems.length==0">list is empty :(</p>
   </div>
 </template>
 
@@ -27,6 +28,12 @@
     components: {
         ListItem
     },
-    props: ['listItems']
+    props: {
+      listItems: {
+        required: false,
+        type: Array,
+        default: () => [],
+      },
+},
   }
 </script>
