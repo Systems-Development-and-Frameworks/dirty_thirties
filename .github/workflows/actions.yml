@@ -1,0 +1,30 @@
+name: "jest and lint"
+
+on:
+  push:
+   # branches: [ main ]
+defaults:
+  run:
+    working-directory: ./webapp/
+
+
+jobs:
+    test:
+      name: jest
+      runs-on: ubuntu-latest
+      steps:
+      - uses: actions/checkout@v2
+      - uses: actions/setup-node@v1
+      - run: |
+              npm ci
+              npm run test:unit
+    
+    lint:
+      name: lint
+      runs-on: ubuntu-latest
+      steps:
+      - uses: actions/checkout@v2
+      - uses: actions/setup-node@v1
+      - run: |
+              npm ci
+              npm run lint
