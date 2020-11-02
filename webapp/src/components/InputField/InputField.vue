@@ -7,10 +7,10 @@
 
 <!-- HTML section -->
 <template>
-  <div id="basic-Input" class="input" >
+  <form id="basic-Input" class="input" >
     <input v-model='newTitle'>
-    <button  @click="$emit('create-item', newTitle)">create</button>
-  </div>
+    <button  @click.prevent ="additem">create</button>
+  </form>
 </template>
 
 <!-- script section -->
@@ -22,6 +22,12 @@
       return {
         newTitle: ''
       }
+    },
+    methods:{
+      additem(){
+        this.$emit('create-item', this.newTitle)
+        this.newTitle=""
+        }
     }
   }
 </script>

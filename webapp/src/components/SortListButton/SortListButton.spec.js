@@ -1,5 +1,5 @@
 import {mount} from '@vue/test-utils'
-import SortListButton from '@/components/SortListbutton/SortListButton.vue'
+import SortListButton from '@/components/SortListButton/SortListButton.vue'
 
 describe (
     "SortListButton.vue", ()=> {
