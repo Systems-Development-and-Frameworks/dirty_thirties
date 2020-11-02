@@ -8,7 +8,8 @@
 <!-- HTML section -->
 <template>
   <form id="basic-Input" class="input" >
-    <input v-model='newTitle'>
+    <label for="title">Title:</label>
+    <input id="title" placeholder="was schönes" v-model='newTitle'>
     <button  @click.prevent ="additem">create</button>
   </form>
 </template>
