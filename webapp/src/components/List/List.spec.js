@@ -1,5 +1,5 @@
 import {mount} from '@vue/test-utils'
-import List from '@/components/List.vue'
+import List from '@/components/List/List.vue'
 
 describe (
     "List.vue", ()=> {

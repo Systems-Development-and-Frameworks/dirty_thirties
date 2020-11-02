@@ -22,9 +22,9 @@
 
 <!-- script section -->
 <script>
-import  InputField  from './components/InputField'
-import  List  from './components/List'
-import SortListButton from './components/SortListButton'
+import  InputField  from './components/InputField/InputField'
+import  List  from './components/List/List'
+import SortListButton from './components/SortListButton/SortListButton'
 
 export default {
   name: 'App',
