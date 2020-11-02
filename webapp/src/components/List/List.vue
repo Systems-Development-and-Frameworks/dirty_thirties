@@ -22,7 +22,7 @@
 
 <!-- script section -->
 <script>
-  import  ListItem from './ListItem'
+  import  ListItem from '@/components/ListItem/ListItem'
   export default {
     name: 'List',
     components: {
