@@ -22,11 +22,11 @@ export default {
   name: 'ListItem',
   props: ['item'],
   methods: {
-    upvoteItem: function() {
+    upvoteItem() {
       this.item.votes++;
       this.$emit('update-item', this.item)
     },
-    downvoteItem: function() {
+    downvoteItem() {
       this.item.votes--;
       this.$emit('update-item', this.item)
     }
