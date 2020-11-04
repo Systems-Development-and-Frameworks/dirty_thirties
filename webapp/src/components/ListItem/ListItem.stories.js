@@ -4,6 +4,8 @@ export default {
     title: 'Dirty/ListItem',
     component: ListItem,
     argTypes: {
+      deleteItem: { action: "deleteItem"},
+      updateItem: { action: "updateItem"}
     },
   };
   
