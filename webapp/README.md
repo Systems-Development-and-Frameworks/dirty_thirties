@@ -1,4 +1,5 @@
 # VueJS
+[![Actions Status](https://github.com/Systems-Development-and-Frameworks/dirty_thirties/workflows/CI/badge.svg)](https://github.com/Systems-Development-and-Frameworks/dirty_thirties/actions)
 
 Due date: **28.10.2020**
 

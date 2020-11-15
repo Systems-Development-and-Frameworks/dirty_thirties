@@ -12,21 +12,28 @@
       v-for="item in listItems"
       :key="item.id"
       :item="item"
-      v-on:delete-item="$emit('delete-item', $event)"
-      v-on:update-item="$emit('update-item', $event)"
+      @delete-item="$emit('delete-item', $event)"
+      @update-item="$emit('update-item', $event)"
       >
     </ListItem>
+    <p v-if="listItems.length==0">list is empty :(</p>
   </div>
 </template>
 
 <!-- script section -->
 <script>
-  import  ListItem from './ListItem'
+  import  ListItem from '@/components/ListItem/ListItem'
   export default {
     name: 'List',
     components: {
         ListItem
     },
-    props: ['listItems']
+    props: {
+      listItems: {
+        required: false,
+        type: Array,
+        default: () => [],
+      },
+},
   }
 </script>

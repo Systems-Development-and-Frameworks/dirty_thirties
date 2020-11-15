@@ -9,27 +9,33 @@
 <template>
   <div id="app">
     <h1>News List</h1>
-    <List id="li" :listItems='news'
-      v-on:delete-item='deleteItem($event)'
-      v-on:update-item='updateItem($event)'
+    <SortListButton
+    @sortorder="sortItems"
+    />
+    <List id="li" :list-items="sortedItems"
+      @delete-item='deleteItem($event)'
+      @update-item='updateItem($event)'
     ></List>
-    <InputField id="in" v-on:create-item='createItem($event)'></InputField>
+    <InputField id="in" @create-item='createItem($event)'></InputField>
   </div>
 </template>
 
 <!-- script section -->
 <script>
-import  InputField  from './components/InputField'
-import  List  from './components/List'
+import  InputField  from './components/InputField/InputField'
+import  List  from './components/List/List'
+import SortListButton from './components/SortListButton/SortListButton'
 
 export default {
   name: 'App',
   components:{
     List,
-    InputField
+    InputField,
+    SortListButton
   },
-  data: function () {
+  data() {
     return {
+      sortOrder :"ascending",
       counter: 3,
       // pre-filled input fields with ID, titles and votes
       news:[
@@ -54,35 +60,52 @@ export default {
 
   methods: {
     // creation of new item
-    createItem: function(newTitle) {
+    createItem(newTitle) {
       this.news.push({
           id: this.counter++,
           title: newTitle,
           votes: 0
       });
-      this.sortItems();
+      // this.sortItems();
     },
     // deleting an item
-    deleteItem: function(item) {
+    deleteItem(item) {
       this.news = this.news.filter(el => el.id != item.id);
     },
     //updating an item
-    updateItem: function(item) {
+    updateItem(item) {
       this.news.map(el => {
         if (el.id == item.id) {
           return item
         }
         return el
       })
-      this.sortItems();
+      // this.sortItems();
     },
     //sorting of items 
-    sortItems: function() {
-      this.news = [...this.news].sort((a,b) => (a.votes < b.votes) ? 1 : ((b.votes < a.votes) ? -1 : 0));
+    sortItems(sort="ascending") {
+      this.sortOrder = sort;
+      // if (sort=="ascending"){
+      // this.news = [...this.news].sort((a,b) => (a.votes < b.votes) ? 1 : ((b.votes < a.votes) ? -1 : 0));
+      
+      // }
+      // else{
+      //   this.news = [...this.news].sort((a,b) => (a.votes > b.votes) ? 1 : ((b.votes > a.votes) ? -1 : 0));
+      // }
     }
   },
-  mounted: function() {
-    this.sortItems()
+  computed:{
+    sortedItems(){
+       if (this.sortOrder=="ascending"){
+      return [...this.news].sort((a,b) => (a.votes < b.votes) ? 1 : ((b.votes < a.votes) ? -1 : 0));
+      
+      }
+      return [...this.news].sort((a,b) => (a.votes > b.votes) ? 1 : ((b.votes > a.votes) ? -1 : 0));
+      
+    }
+  },
+  mounted() {
+    // this.sortItems()
   },
 }
 </script>

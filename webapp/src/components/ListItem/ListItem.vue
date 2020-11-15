@@ -9,8 +9,8 @@
 <template>
   <div id="list-item">
     <h2>{{item.title}} - ({{item.votes}})</h2>
-    <button @click="upvoteItem();$emit('update-item', item)">Upvote</button>
-    <button @click="downvoteItem();$emit('update-item', item)">Downvote</button>
+    <button @click="upvoteItem();">Upvote</button>
+    <button @click="downvoteItem();">Downvote</button>
     <button @click="$emit('delete-item', item)">Remove</button>
     <br />
   </div>
@@ -22,12 +22,15 @@ export default {
   name: 'ListItem',
   props: ['item'],
   methods: {
-    upvoteItem: function() {
+    upvoteItem() {
       this.item.votes++;
+      this.$emit('update-item', this.item)
     },
-    downvoteItem: function() {
+    downvoteItem() {
       this.item.votes--;
+      this.$emit('update-item', this.item)
     }
+    
   }
 }
 </script>
