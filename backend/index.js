@@ -1,24 +1,11 @@
+//import of schema and resolver 
+import typeDefs from './typeDefs.js'
+import resolver from './resolver.js'
+
+//Apollo Server
 const { ApolloServer, gql } = require('apollo-server');
 
-// A schema is a collection of type definitions (hence "typeDefs")
-// that together define the "shape" of queries that are executed against
-// your data.
-const typeDefs = gql`
-  # Comments in GraphQL strings (such as this one) start with the hash (#) symbol.
-
-  # This "Book" type defines the queryable fields for every book in our data source.
-  type Book {
-    title: String
-    author: String
-  }
-
-  # The "Query" type is special: it lists all of the available queries that
-  # clients can execute, along with the return type for each. In this
-  # case, the "books" query returns an array of zero or more Books (defined above).
-  type Query {
-    books: [Book]
-  }
-`;
+//not needed 
 const books = [
   {
     title: 'The Awakening',
@@ -30,17 +17,12 @@ const books = [
   },
 ];
 
-// Resolvers define the technique for fetching the types defined in the
-// schema. This resolver retrieves books from the "books" array above.
-const resolvers = {
-  Query: {
-    books: () => books,
-  },
-};
-
 // The ApolloServer constructor requires two parameters: your schema
 // definition and your set of resolvers.
-const server = new ApolloServer({ typeDefs, resolvers });
+const server = new ApolloServer({ 
+  typeDefs,
+  resolvers 
+});
 
 // The `listen` method launches a web server.
 server.listen().then(({ url }) => {
@@ -60,8 +42,6 @@ mutate({
   mutation: UPDATE_USER,
   variables: { id: 1, email: 'nancy@foo.co' }
 });
-
-const { createTestClient } = require('apollo-server-testing');
 
 it('fetches single launch', async () => {
   const userAPI = new UserAPI({ store });
@@ -90,3 +70,19 @@ it('fetches single launch', async () => {
   const res = await query({ query: GET_LAUNCH, variables: { id: 1 } });
   expect(res).toMatchSnapshot();
 });
+
+import { DataSource } from 'apollo-datasource'
+
+export default class InMemoryDataSource extends DataSource {
+  constructor () {
+    super()
+  }
+
+  initialize ({ context }) {}
+
+  allPosts () {}
+  createPost (data) {}
+  upvotePost(id, user) {}
+}
+
+
