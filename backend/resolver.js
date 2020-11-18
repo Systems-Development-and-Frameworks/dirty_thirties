@@ -1,9 +1,11 @@
+
+
 // Resolvers define the technique for fetching the types defined in the
 // schema. This resolver retrieves books from the "books" array above.
 const resolvers = {
   Query: {
-    posts: () => posts,
-    users: () => users,
+    posts: (parent, args, context, info) => posts,  ((context.dataSources.db ? ))
+    users: (parent, args, context, info) => users,
   },
 
   Post: {
