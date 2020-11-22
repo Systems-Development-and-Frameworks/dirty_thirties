@@ -6,7 +6,6 @@ const typeDefs = gql`
     id: ID!
     title: String!
     votes: Int!
-    author: User!
   }
 
   type User {
@@ -20,19 +19,7 @@ const typeDefs = gql`
   }
 
   type Mutation {
-
     write(post: PostInput!): Post
-    
-    # 🚀 OPTIONAL
-    delete(id: ID!): Post
-
-    # ⚠️ FIXME in exercise #4
-    # mock voter until we have authentication
-    
-    upvote(id: ID!, voter: UserInput!): Post
-
-    # 🚀 OPTIONAL
-    downvote(id: ID!, voter: UserInput!): Post
   }
 
   input PostInput {
@@ -47,4 +34,6 @@ const typeDefs = gql`
     name: String!
   }
 
-`;
+`
+
+export default typeDefs

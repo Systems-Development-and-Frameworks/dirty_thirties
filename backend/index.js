@@ -1,11 +1,21 @@
-//import of schema and resolver 
+//import of schema and resolver
 import typeDefs from './typeDefs.js'
 import resolver from './resolver.js'
+//import users.spec.js???
+//import { ApolloServer } from 'apollo-server' ???
+import { DataSource } from 'apollo-datasource'
+import crypto from 'crypto'
 
 //Apollo Server
 const { ApolloServer, gql } = require('apollo-server');
 
-//Konstanten User - evtl nicht nötig weil ja nicht konstant 
+const ds = new InMemoryDataSource()
+ds.posts = [new Post({ title: 'post'})]
+
+const dataSources = () => ({ ds })
+
+const context = ({ req, res }) => ({ req, res })
+//consts for users and posts
 const users = [
   {
     name: 'Klaus Meier', //name of the user
@@ -37,12 +47,13 @@ const posts = [
 
 //jede Person nur 1x upvoten - siehe Hints (Mengen) -> sets
 
-
 // The ApolloServer constructor requires two parameters: your schema
 // definition and your set of resolvers.
-const server = new ApolloServer({ 
+const server = new ApolloServer({
   typeDefs,
-  resolvers 
+  resolvers,
+  dataSources,
+  context
 });
 
 // The `listen` method launches a web server.
@@ -50,12 +61,17 @@ server.listen().then(({ url }) => {
   console.log(`🚀  Server ready at ${url}`);
 });
 
-import { DataSource } from 'apollo-datasource'
+export class Post {
+  constructor (data) {
+    this.id = crypto.randomBytes(16).toString('hex')
+    Object.assign(this, data)
+  }
+}
 
 export default class InMemoryDataSource extends DataSource {
   constructor () {
     super()
-    //befüllen ggfs. this.
+    //befüllen ggfs.
     this.post = []
   }
 
@@ -71,5 +87,3 @@ export default class InMemoryDataSource extends DataSource {
   }
   upvotePost(id, user) {}
 }
-
-
