@@ -14,7 +14,7 @@ const server = new Server({ dataSources: () => ({ ds }) });
 const { query, mutate } = createTestClient(server);
 
 describe('queries', () => {
-  describe('POSTS', () =>
+  describe('POSTS', () => {
     const POSTS = gql`
       query {
         posts {
@@ -22,20 +22,21 @@ describe('queries', () => {
           title
         }
       }
+    `;
 
     it('returns empty array', async () => {
       await expect(query({ query : POSTS }))
         .resolves
         .toMatchObject({
             errors: undefined,
-            data: { posts: [] }
-        })
-    })
+            data: { posts: [] },
+        });
+    });
 
     describe('given posts in database', () => {
       beforeEach(() => {
         ds.posts = [new Post({ title: 'Some post', authorName: 'Jenny V.' })];
-      })
+      });
 
       it('returns posts', async () => {
         await expect(query({ query: POSTS }))
@@ -44,12 +45,12 @@ describe('queries', () => {
               errors: undefined,
               data: {
                 posts: [{ id: expect.any(String), title: 'Some post', votes: 0, author: { name: "Jenny V." } }],
-              }
-          })
-      })
-    })
-  })
-})
+              },
+          });
+      });
+    });
+  });
+});
 
 describe('mutations', () => {
     describe('WRITE_POST', () => {
@@ -64,29 +65,29 @@ describe('mutations', () => {
                     }
                 }
             }
-        `
+        `;
         const action = () =>
-            mutate({ mutation: WRITE_POST, variables: { post: { title: 'Some post', author: { name: 'Jenny V.' } } } })
+            mutate({ mutation: WRITE_POST, variables: { post: { title: 'Some post', author: { name: 'Jenny V.' } } } });
         const invalidUser = () =>
-            mutate({ mutation: WRITE_POST, variables: { post: { title: 'Some post', author: { name: 'INVALID' } } } })
+            mutate({ mutation: WRITE_POST, variables: { post: { title: 'Some post', author: { name: 'INVALID' } } } });
 
         it('throws error when user is invalid', async () => {
             const {
-                errors: [error]
-            } = await invalidUser()
-            expect(error.message).toEqual('Invalid user')
+                errors: [error],
+            } = await invalidUser();
+            expect(error.message).toEqual('Invalid user');
         })
 
         it('adds a post to ds.posts', async () => {
-            expect(ds.posts).toHaveLength(0)
-            await action()
-            expect(ds.posts).toHaveLength(1)
+            expect(ds.posts).toHaveLength(0);
+            await action();
+            expect(ds.posts).toHaveLength(1);
         })
 
         it('calls ds.createPost', async () => {
-            ds.createPost = jest.fn(() => {})
-            await action()
-            expect(ds.createPost).toHaveBeenCalledWith({ title: 'Some post', authorName: 'Jenny V.' })
+            ds.createPost = jest.fn(() => {});
+            await action();
+            expect(ds.createPost).toHaveBeenCalledWith({ title: 'Some post', authorName: 'Jenny V.' });
         })
 
         it("responds with created post", async () => {
@@ -97,10 +98,10 @@ describe('mutations', () => {
         })
     })
     describe("VOTE_POST", () => {
-        let postId,
+        let postId;
         beforeEach(() => {
-            ds.posts = [new Post({ title: 'Some post', authorName: 'Jenny V.' })]
-            postId = ds.posts[0].id
+            ds.posts = [new Post({ title: 'Some post', authorName: 'Jenny V.' })];
+            postId = ds.posts[0].id;
         })
         describe('UPVOTE_POST', () => {
             const UPVOTE_POST = gql`
@@ -114,45 +115,45 @@ describe('mutations', () => {
                         votes
                     }
                 }
-            `
+            `;
             const upvote = () => {
                 mutate({
                     mutation: UPVOTE_POST,
-                    variables: { id: postId, voter: { name: 'Jenny V.'} }
+                    variables: { id: postId, voter: { name: 'Jenny V.'} },
                 })
-            }
+            };
 
             it('calls ds.upvotePost', async () => {
                 ds.upvotePost = jest.fn((id, userInput) => {
                     console.log(id)
                     console.log(userInput)
                 })
-                await upvote()
-                expect(ds.upvotePost).toHaveBeenCalledWith(postId, 'Jenny V.')
-            })
+                await upvote();
+                expect(ds.upvotePost).toHaveBeenCalledWith(postId, 'Jenny V.');
+            });
 
             it('throws error when post id invalid', async () => {
                 const invalidId = () => {
-                    mutate({ mutation: UPVOTE_POST, variables: { id: 123, voter: { name: 'Jenny V.' } } })
-                }
+                    mutate({ mutation: UPVOTE_POST, variables: { id: 123, voter: { name: 'Jenny V.' } } });
+                };
                 const {
-                    errors: [error]
-                } = await invalidId()
-                expect(error.message).toEqual('Invalid post')
-            })
+                    errors: [error],
+                } = await invalidId();
+                expect(error.message).toEqual('Invalid post');
+            });
 
             it('throws error when user is invalid', async () => {
                 const invalidUser = () => {
                     mutate({
                         mutation: UPVOTE_POST,
-                        variables: { id: postId, voter: { name: 'INVALID' } }
-                    })
-                }
+                        variables: { id: postId, voter: { name: 'INVALID' } },
+                    });
+                };
                 const {
-                    errors: [error]
-                } = await invalidUser()
-                expect(error.message).toEqual('Invalid user')
-            })
+                    errors: [error],
+                } = await invalidUser();
+                expect(error.message).toEqual('Invalid user');
+            });
 
             it('upvotes post', async () => {
                 await expect(upvote())
@@ -160,10 +161,10 @@ describe('mutations', () => {
                   .toMatchObject({
                     errors: undefined,
                     data: {
-                        upvote: { title: 'Some post', id: expect.any(String), votes: 1, author: { name: 'Jenny V.' } }
-                    }
-                  })
-            })
-        })
-    })
-})
+                        upvote: { title: 'Some post', id: expect.any(String), votes: 1, author: { name: 'Jenny V.' } },
+                    },
+                  });
+            });
+        });
+    });
+});
