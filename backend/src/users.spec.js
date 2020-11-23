@@ -1,17 +1,17 @@
-import { gql } from 'apollo-server'
-import { createTestClient } from 'apollo-server-testing'
-import Server from './server.js'
-import { InMemoryDataSource, User, Post } from './ds.js'
+import { gql } from 'apollo-server';
+import { createTestClient } from 'apollo-server-testing';
+import Server from './server.js';
+import { InMemoryDataSource, User, Post } from './ds.js';
 
-let ds
+let ds;
 beforeEach(() => {
-    ds = new InMemoryDataSource(),   //Komma norwendig?
-    ds.users.push(new User('Jenny V.'), new User('Sarah M.'))
+    ds = new InMemoryDataSource();
+    ds.users.push(new User('Jenny V.'), new User('Sarah M.'));
+}
 
+const server = new Server({ dataSources: () => ({ ds }) });
 
-const server = new Server({ dataSources: () => ({ ds }) })
-
-const { query, mutate } = createTestClient(server)
+const { query, mutate } = createTestClient(server);
 
 describe('queries', () => {
     describe('USERS', () => {
@@ -21,14 +21,14 @@ describe('queries', () => {
                     name
                 }
             }
-        `
+        `;
 
         it('given users in the database', async () => {
             await expect(query({ query: USERS }))
               .resolves
               .toMatchObject({
                 errors: undefined,
-                data: { users: [{ name: 'Jenny V.' }, { name: 'Sarah M.' }] }
+                data: { users: [{ name: 'Jenny V.' }, { name: 'Sarah M.' }] },
             })
         })
     })
@@ -52,10 +52,10 @@ describe('queries', () => {
                 errors: undefined,
                 data: {
                     users: [
-                        { name: 'Jenny V.', posts: [] }, //muss hier ein Komma ?
-                        { name: 'Sarah M.', posts: [] }
+                        { name: 'Jenny V.', posts: [] },
+                        { name: 'Sarah M.', posts: [] },
                     ]
-                }
+                },
             })
         })
 
@@ -63,7 +63,7 @@ describe('queries', () => {
             const action = () =>
                 mutate({
                     mutation: WRITE_POST,
-                    variables: { post: { title: "Some post", author: { name: 'Jenny V.' } } }
+                    variables: { post: { title: 'Some post', author: { name: 'Jenny V.' } } }
                 })
             const WRITE_POST = gql`
                 mutation($post: PostInput!) {

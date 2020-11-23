@@ -3,7 +3,7 @@
 //2. List all users
 //3. Create a post
 //4. Upvote a post
-const { UserInputError } = require("apollo-server");
+import { UserInputError } from 'apollo-server';
 
 // Resolvers define the technique for fetching the types defined in the
 // schema
@@ -28,6 +28,7 @@ const resolvers = {
         // console.log(context.dataSources.db.createPost(newPost));
         return await context.dataSources.ds.createPost(newPost);
     },
+
     upvote: async (parent, args, context) => {
       const upvoter = await context.dataSources.ds.getUser(args.voter.name);
       if (!upvoter) {

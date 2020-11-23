@@ -1,7 +1,7 @@
-import Server from ''./server.js'
+import Server from './server.js';
 
-const server = new Server()
+const server = new Server();
 
 server.listen().then(({ url }) => {
-    console.log(`🚀  Server ready at ${url}`)
+    console.log(`🚀  Server ready at ${url}`);
 })

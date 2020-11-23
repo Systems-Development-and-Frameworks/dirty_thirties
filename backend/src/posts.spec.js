@@ -1,17 +1,17 @@
-import { createTestClient } from 'apollo-server-testing'
-import { gql } from ' apollo-server'
-import Server from './server.js'
-import { InMemoryDataSource, User, Post } from './ds.js'
+import { createTestClient } from 'apollo-server-testing';
+import { gql } from 'apollo-server';
+import Server from './server.js';
+import { InMemoryDataSource, User, Post } from './ds.js';
 
-let ds
+let ds;
 beforeEach(() => {
-    ds = new InMemoryDataSource(),  //muss hier ein Komma?
-    ds.users.push(new User('Jenny V.'))
-})
+    ds = new InMemoryDataSource();
+    ds.users.push(new User('Jenny V.'));
+});
 
-const server = new Server({ dataSources: () => ({ ds }) })
+const server = new Server({ dataSources: () => ({ ds }) });
 
-const { query, mutate } = createTestClient(server)
+const { query, mutate } = createTestClient(server);
 
 describe('queries', () => {
   describe('POSTS', () =>
