@@ -94,7 +94,7 @@ describe('queries', () => {
             beforeEach(() => {
                 ds.posts = [new Post({ title: 'Some post', authorName: 'Jenny V.' })],
                 postId = ds.posts[0].id
-            });
+            })
             const deletePost = () =>
                 mutate({
                     mutation: DELETE_POST,
