@@ -1,6 +1,7 @@
 //import of schema and resolver
 import typeDefs from './typeDefs.js'
 import resolver from './resolver.js'
+import { createRequire } from 'module';
 //import users.spec.js???
 //import { ApolloServer } from 'apollo-server' ???
 import { DataSource } from 'apollo-datasource'
