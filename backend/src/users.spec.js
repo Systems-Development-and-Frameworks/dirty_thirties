@@ -7,7 +7,7 @@ let ds;
 beforeEach(() => {
     ds = new InMemoryDataSource();
     ds.users.push(new User('Jenny V.'), new User('Sarah M.'));
-}
+});
 
 const server = new Server({ dataSources: () => ({ ds }) });
 
@@ -29,9 +29,9 @@ describe('queries', () => {
               .toMatchObject({
                 errors: undefined,
                 data: { users: [{ name: 'Jenny V.' }, { name: 'Sarah M.' }] },
-            })
-        })
-    })
+            });
+        });
+    });
 
     describe('USERS', () => {
         const USERS = gql`
@@ -43,7 +43,7 @@ describe('queries', () => {
                     }
                 }
             }
-        `
+        `;
 
         it('returns all users with no posts', async () => {
             await expect(query({ query: USERS }))
@@ -56,14 +56,14 @@ describe('queries', () => {
                         { name: 'Sarah M.', posts: [] },
                     ]
                 },
-            })
-        })
+            });
+        });
 
         describe('WRITE_POST', () => {
             const action = () =>
                 mutate({
                     mutation: WRITE_POST,
-                    variables: { post: { title: 'Some post', author: { name: 'Jenny V.' } } }
+                    variables: { post: { title: 'Some post', author: { name: 'Jenny V.' } } },
                 })
             const WRITE_POST = gql`
                 mutation($post: PostInput!) {
@@ -76,7 +76,7 @@ describe('queries', () => {
                         }
                     }
                 }
-            `
+            `;
             it('adds post to user', async () => {
                 await expect(action())
                   .resolves
@@ -84,22 +84,22 @@ describe('queries', () => {
                     errors: undefined,
                     data: {
                         write: { author: { name: 'Jenny V.', posts: [{ title: 'Some post' }] } }
-                    }
-                })
-            })
-        })
+                    },
+                });
+            });
+        });
 
         describe('DELETE_POST', () => {
-            let postId,
+            let postId;
             beforeEach(() => {
-                ds.posts = [new Post({ title: 'Some post', authorName: 'Jenny V.' })],
-                postId = ds.posts[0].id
-            })
+                ds.posts = [new Post({ title: 'Some post', authorName: 'jenny V.' })];
+                postId = ds.posts[0].id;
+            });
             const deletePost = () =>
                 mutate({
                     mutation: DELETE_POST,
-                    variables: { id: postId }
-                })
+                    variables: { id: postId },
+                });
             const DELETE_POST = gql`
                 mutation($id: ID!) {
                     delete(id: $id) {
@@ -111,17 +111,17 @@ describe('queries', () => {
                         }
                     }
                 }
-            `
+            `;
             it('removes post from a user', async () => {
                 await expect(deletePost())
                   .resolves
                   .toMatchObject({
                     errors: undefined,
                     data: {
-                        delete: { author: { name: 'Jenny V.', posts: [] } }
-                    }
-                })
-            })
-        })
-    })
-})
+                        delete: { author: { name: 'Jenny V.', posts: [] } },
+                    },
+                });
+            });
+        });
+    });
+});
