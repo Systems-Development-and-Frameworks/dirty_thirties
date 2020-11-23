@@ -1,14 +1,14 @@
 // A schema is a collection of type definitions (hence "typeDefs")
 // that together define the "shape" of queries that are executed against
 // the data
-import { gql } from 'apollo-server'
+import { gql } from 'apollo-server';
 
 const typeDefs = gql`
   type Post {
     id: ID!
     title: String!
     votes: Int!
-    author: User! 
+    author: User!
   }
 
   type User {
@@ -37,7 +37,6 @@ const typeDefs = gql`
   input UserInput {
     name: String!
   }
-
-`;
+`
 
 export default typeDefs;
