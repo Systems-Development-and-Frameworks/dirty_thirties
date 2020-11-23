@@ -92,8 +92,8 @@ describe('queries', () => {
         describe('DELETE_POST', () => {
             let postId,
             beforeEach(() => {
-                db.posts = [new Post({ title: 'Some post', authorName: 'Jenny V.' })],
-                postId = db.posts[0].id
+                ds.posts = [new Post({ title: 'Some post', authorName: 'Jenny V.' })],
+                postId = ds.posts[0].id
             });
             const deletePost = () =>
                 mutate({
