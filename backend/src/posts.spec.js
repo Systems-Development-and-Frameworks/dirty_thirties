@@ -1,7 +1,7 @@
 import { createTestClient } from 'apollo-server-testing'
 import { gql } from ' apollo-server'
-import Server from '/server.js'
-import { InMemoryDataSource, User, Post } from './datasource.js'
+import Server from './server.js'
+import { InMemoryDataSource, User, Post } from './ds.js'
 
 let ds
 beforeEach(() => {
