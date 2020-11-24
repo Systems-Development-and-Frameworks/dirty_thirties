@@ -12,3 +12,15 @@ This pic gives a first impression on the topic we have to face this semester.
 
 
 
+to start Apollo server enter: 
+
+npm run dev
+
+Lint: 
+
+npm run lint
+
+jest: 
+
+npm run test
+
