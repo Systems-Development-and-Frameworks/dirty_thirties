@@ -91,7 +91,7 @@ export default {
     author(obj, args, context) {
       return context.dataSources.db.getUser(obj.authorid);
     },
-    votes(obj, args, context) {
+    votes(obj) {
       return obj.voters.size;
     },
   },

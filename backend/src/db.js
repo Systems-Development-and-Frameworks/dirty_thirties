@@ -24,7 +24,7 @@ export class InMemoryDataSource extends DataSource {
     this.users = [];
   }
 
-  initialize(...args) {}
+  // initialize(...args) {}
 
   allUsers() {
     return this.users;
