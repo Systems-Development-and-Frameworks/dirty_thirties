@@ -8,11 +8,12 @@ const typeDefs = gql`
     id: ID!
     title: String!
     votes: Int!
-    author: User!
+    author: User
   }
 
   type User {
-    name: ID!
+    id: ID!
+    name: String!
     posts: [Post]
   }
 
@@ -22,8 +23,10 @@ const typeDefs = gql`
   }
 
   type Mutation {
-    write(post: PostInput!): Post
-    upvote(id: ID!, voter: UserInput!): Post
+    createPost(title: String!, userId: ID!): Post
+    upvotePost(id: ID!, userId: ID!): Post
+    downvotePost(id: ID!, userId: ID!): Post
+    deletePost(id: ID!, userId: ID!): Post
   }
 
   input PostInput {
@@ -31,12 +34,10 @@ const typeDefs = gql`
 
     # ⚠️ FIXME in exercise #4
     # mock author until we have authentication
-    author: UserInput!
+    # author: UserInput!
   }
 
-  input UserInput {
-    name: String!
-  }
-`
+  
+`;
 
 export default typeDefs;
