@@ -31,4 +31,4 @@ export default class Server {
     };
     return new ApolloServer({ ...defaults, ...opts });
   }
-};
+}

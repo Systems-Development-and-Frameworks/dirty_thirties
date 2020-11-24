@@ -4,14 +4,14 @@ import Server from '../server.js';
 import { InMemoryDataSource, User, Post } from '../db.js';
 
 let TEST_USER_ID_0;
-let TEST_USER_ID_1;
+// let TEST_USER_ID_1;
 let db;
 beforeEach(() => {
   db = new InMemoryDataSource();
   db.users.push(new User('Jenny V.'), new User('Sarah M.'));
 
   TEST_USER_ID_0 = db.users[0].id;
-  TEST_USER_ID_1 = db.users[1].id;
+ // TEST_USER_ID_1 = db.users[1].id;
 });
 
 const server = new Server({ dataSources: () => ({ db }) });
