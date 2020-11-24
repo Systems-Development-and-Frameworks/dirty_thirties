@@ -37,10 +37,13 @@ jest:
 npm run test
 ```
 
-
 ## Team
 
-[![Jenny](https://octodex.github.com/images/saketocat.png)] | [![Nele](https://octodex.github.com/images/saritocat.png)] | [![Sarah](https://octodex.github.com/images/femalecodertocat.png)]
----|---
-[Jenny] | [Nele] | [Sarah]
+[![Jenny](https://octodex.github.com/images/saketocat.png)]
+[Jenny]
 
+[![Nele](https://octodex.github.com/images/saritocat.png)]
+[Nele]
+
+[![Sarah](https://octodex.github.com/images/femalecodertocat.png)]
+[Sarah]
