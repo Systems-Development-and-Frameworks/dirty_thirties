@@ -1,8 +1,6 @@
-name: "jest and lint"
 
 on:
   push:
-   # branches: [ main ]
 defaults:
   run:
     working-directory: ./webapp/
@@ -10,7 +8,7 @@ defaults:
 
 jobs:
     test:
-      name: jest
+      name: jest in webapp
       runs-on: ubuntu-latest
       steps:
       - uses: actions/checkout@v2
@@ -20,7 +18,7 @@ jobs:
               npm run test:unit
     
     lint:
-      name: lint
+      name: lint in webapp
       runs-on: ubuntu-latest
       steps:
       - uses: actions/checkout@v2
