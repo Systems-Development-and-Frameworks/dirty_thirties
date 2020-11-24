@@ -1,33 +1,34 @@
 //import of schema, resolver, Server and DataSource
-import { ApolloServer, gql } from 'apollo-server';
-import typeDefs from './typeDefs.js';
-import resolver from './resolver.js';
-import InMemoryDataSource, { Post, User } from './ds.js';
+import { ApolloServer } from 'apollo-server';
+import typeDefs from './typeDefs';
+import { Post, User, InMemoryDataSource } from './db';
+import resolvers from './resolvers';
 
 const ds = new InMemoryDataSource();
-//console.log(ds);
-//console.log(ds.posts);
 
-ds.posts.push(new Post({ title: 'Test Post', authorName: 'Jenny V.' }));
-ds.users.push(new User('Jenny V.'), new User('Sarah M.'));
+// create Users
+db.users = [new User('Jenny V.'), new User('Sarah M.'), new User('Nele H.')];
 
-const dataSources = () => ({ ds });
+// create posts
+db.posts = [
+  new Post({ title: 'a test post', authorid: db.users[0].id }),
+  new Post({ title: 'an exciting post', authorid: db.users[1].id }),
+  new Post({ title: 'an new post', authorid: db.users[1].id }),
+];
 
+const dataSources = () => ({ db });
 const context = ({ req, res }) => ({ req, res });
 
 export default class Server {
   // The ApolloServer constructor requires two parameters: your schema
   // definition and your set of resolvers.
-  constructor (opts) {
-    const defaults = {};
-    const server = new ApolloServer({
-      ...defaults,
-      ...opts,
+  constructor(opts) {
+    const defaults = {
       typeDefs,
-      resolver,
+      resolvers,
       dataSources,
-      context
-    });
-    return server;
+      context,
+    };
+    return new ApolloServer({ ...defaults, ...opts });
   }
 };
