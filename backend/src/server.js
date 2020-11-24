@@ -4,7 +4,7 @@ import typeDefs from './typeDefs';
 import { Post, User, InMemoryDataSource } from './db';
 import resolvers from './resolvers';
 
-const ds = new InMemoryDataSource();
+const db = new InMemoryDataSource();
 
 // create Users
 db.users = [new User('Jenny V.'), new User('Sarah M.'), new User('Nele H.')];
