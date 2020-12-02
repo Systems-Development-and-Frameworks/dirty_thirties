@@ -10,7 +10,7 @@ import permissions from './middleware/permissions';
 const db = new InMemoryDataSource();
 
 // create Users
-db.users = [new User('Jenny V.'), new User('Sarah M.'), new User('Nele H.')];
+db.users = [new User('Jenny V.', 'jenny@email.com', 'cheescake'), new User('Sarah M.', 'sarah@email.com', 'marzipan'), new User('Nele H.', 'nele@email.com', 'tiramisu')];
 
 // create posts
 db.posts = [

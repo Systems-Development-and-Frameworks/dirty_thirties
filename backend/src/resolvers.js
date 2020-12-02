@@ -12,6 +12,38 @@ export default {
   },
 
   Mutation: {
+    login: (parent, args, context) => {
+      const { email, password } = args;
+
+      if (password.length < 8) {
+        throw new UserInputError('400', {
+          invalidArgs:
+            '[Validation Errors] password is shorter then 8 characters',
+        });
+      }
+
+      // get User
+      const user = context.dataSources.db.getUserByEmail(email);
+
+      if (user == null) {
+        // throw not found
+        throw new UserInputError('404', {
+          invalidArgs: 'user not found',
+        });
+      }
+
+      // try to authorize
+      const canLogIn = bcrypt.compareSync(password, user.password);
+
+      if (!canLogIn) {
+        // throw 401 or return null
+        throw new UserInputError('401', {
+          invalidArgs: 'Unauthorized',
+        });
+      }
+      return 'Bearer ' + createTokenFor(user);
+    },
+
     createPost: (parent, args, context) => {
       // throw error if user does not exist
       const user = context.dataSources.db.getUser(args.userId);
