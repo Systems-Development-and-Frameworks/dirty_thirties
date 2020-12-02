@@ -71,6 +71,18 @@ export default {
       return 'Bearer ' + createTokenFor(newUser);
     },
 
+    write: (parent, args, context) => {
+      console.log(args, args.post);
+
+      const newPost = {
+        title: args.post.title,
+        authorid: context.req.auth.id,
+        votes: 0,
+      };
+
+      return context.dataSources.db.createPost(newPost);
+    },
+
     createPost: (parent, args, context) => {
       // throw error if user does not exist
       const user = context.dataSources.db.getUser(args.userId);

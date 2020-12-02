@@ -29,7 +29,7 @@ const permissions = shield(
         users: isAuthenticated,
     },
     Mutation: {
-      // write: isAuthenticated,
+      write: isAuthenticated,
      // upvote: isAuthenticated
     },
   },
