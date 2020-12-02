@@ -40,7 +40,7 @@ const typeDefs = gql`
     # """
     # returns a signed JWT or null // Register
     # """
-    # signup(name: String!, email: String!, password: String!): String
+    signup(name: String!, email: String!, password: String!): String
   }
   input PostInput {
     title: String!

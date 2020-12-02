@@ -41,6 +41,12 @@ export class InMemoryDataSource extends DataSource {
     return this.users.find((user) => user.email === email);
   }
 
+  createUser(name, email, password) {
+    const newUser = new User(name, email, password);
+    this.users.push(newUser);
+    return newUser;
+  }
+
   allPosts() {
     return this.posts;
   }

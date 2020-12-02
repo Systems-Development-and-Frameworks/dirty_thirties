@@ -46,6 +46,31 @@ export default {
       return 'Bearer ' + createTokenFor(user);
     },
 
+    signup: (parent, args, context) => {
+      const { name, email, password } = args;
+
+      if (password.length < 8) {
+        throw new UserInputError('400', {
+          invalidArgs:
+            '[Validation Errors] password is shorter then 8 characters',
+        });
+      }
+
+      // try to find if the email already exist
+      const userExist = context.dataSources.db.getUserByEmail(email);
+
+      if (userExist != null) {
+        // 409 Conflict
+        throw new UserInputError('409', {
+          invalidArgs: 'Email is already taken',
+        });
+      }
+
+      const newUser = context.dataSources.db.createUser(name, email, password);
+
+      return 'Bearer ' + createTokenFor(newUser);
+    },
+
     createPost: (parent, args, context) => {
       // throw error if user does not exist
       const user = context.dataSources.db.getUser(args.userId);

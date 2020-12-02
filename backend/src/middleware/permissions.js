@@ -26,7 +26,7 @@ const isAuthenticated = rule({ cache: 'no_cache' })(
 const permissions = shield(
   {
     Query: {
-        // later
+        users: isAuthenticated,
     },
     Mutation: {
       // write: isAuthenticated,
