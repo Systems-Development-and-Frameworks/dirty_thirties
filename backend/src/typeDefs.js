@@ -28,7 +28,7 @@ const typeDefs = gql`
     deletePost(id: ID!, userId: ID!): Post
     # new
     write(post: PostInput!): Post
-    # upvote(id: ID!): Post
+    upvote(id: ID!): Post
     # 🚀 OPTIONAL
     # downvote(id: ID!): Post
     # 🚀 OPTIONAL

@@ -82,6 +82,16 @@ export default {
 
       return context.dataSources.db.createPost(newPost);
     },
+    
+    upvote: (parent, args, context) => {
+      const post = context.dataSources.db.getPost(args.id);
+
+      if (!post) {
+        throw new UserInputError('Invalid post', { invalidArgs: args.postId });
+      }
+
+      return context.dataSources.db.upvotePost(post.id, context.req.auth.id);
+    },
 
     createPost: (parent, args, context) => {
       // throw error if user does not exist
