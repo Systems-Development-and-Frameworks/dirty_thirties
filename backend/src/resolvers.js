@@ -4,6 +4,8 @@
 //3. Create a post
 //4. Upvote a post
 import { UserInputError } from 'apollo-server';
+import bcrypt from "bcrypt";
+import {createTokenFor} from './utils/jwt';
 
 export default {
   Query: {
