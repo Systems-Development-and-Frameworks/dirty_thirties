@@ -22,8 +22,6 @@ const typeDefs = gql`
   }
   type Mutation {
     # old  methods
-    createPost(title: String!, userId: ID!): Post
-    upvotePost(id: ID!, userId: ID!): Post
     downvotePost(id: ID!, userId: ID!): Post
     deletePost(id: ID!, userId: ID!): Post
     # new

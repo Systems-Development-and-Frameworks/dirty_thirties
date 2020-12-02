@@ -93,40 +93,6 @@ export default {
       return context.dataSources.db.upvotePost(post.id, context.req.auth.id);
     },
 
-    createPost: (parent, args, context) => {
-      // throw error if user does not exist
-      const user = context.dataSources.db.getUser(args.userId);
-      if (!user) {
-        throw new UserInputError('Invalid user', {
-          invalidArgs: 'Userid does not exist',
-        });
-      }
-
-      const newPost = {
-        title: args.title,
-        authorid: args.userId,
-        votes: 0,
-      };
-
-      return context.dataSources.db.createPost(newPost);
-    },
-
-    upvotePost: (parent, args, context) => {
-      const voter = context.dataSources.db.getUser(args.userId);
-      if (!voter) {
-        throw new UserInputError('Invalid user', {
-          invalidArgs: 'Userid does not exist',
-        });
-      }
-
-      const post = context.dataSources.db.getPost(args.id);
-      if (!post) {
-        throw new UserInputError('Invalid post', { invalidArgs: args.id });
-      }
-
-      return context.dataSources.db.upvotePost(post.id, voter.id);
-    },
-
     downvotePost: (parent, args, context) => {
       const voter = context.dataSources.db.getUser(args.userId);
       if (!voter) {
