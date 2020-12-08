@@ -17,6 +17,8 @@ export default {
     login: (parent, args, context) => {
       const { email, password } = args;
 
+      console.log('##### login',  email, password)
+
       if (password.length < 8) {
         throw new UserInputError('400', {
           invalidArgs:
@@ -24,8 +26,12 @@ export default {
         });
       }
 
+      console.log('##### users', context.dataSources.db.getUsers())
+
       // get User
       const user = context.dataSources.db.getUserByEmail(email);
+
+      console.log('##### user',user )
 
       if (user == null) {
         // throw not found
@@ -36,6 +42,8 @@ export default {
 
       // try to authorize
       const canLogIn = bcrypt.compareSync(password, user.password);
+
+      console.log('##### canLogIn', canLogIn);
 
       if (!canLogIn) {
         // throw 401 or return null
