@@ -81,10 +81,14 @@ describe('posts', () => {
       expect(errors[0].message).toContain('Not Authorised!');
     });
 
-    it('an authenticated user can write a new post', async () => {
+    it.only('an authenticated user can write a new post', async () => {
       const token = await loginUser(mutate);
+      console.log('##### token', token);
+
 
       reqMock = { headers: { authorization: token } };
+
+      console.log('### reqMock', reqMock);
 
       const writePostMutation = mutate({
         mutation: MUTATION_WRITE_POST,

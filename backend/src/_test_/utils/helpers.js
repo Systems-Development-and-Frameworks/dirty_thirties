@@ -6,11 +6,13 @@ export const loginUser = async (
   password = 'marzipan'
 ) => {
   const {
-    data: { login },
+    data,
   } = await mutate({
     mutation: MUTATION_LOGIN,
     variables: { email, password },
   });
 
-  return login;
+  console.log('###### login',data, email , password )
+
+  return data.login;
 };
