@@ -27,10 +27,15 @@ describe('posts', () => {
     resMock = {}
   });
 
-  const context = () => ({ req: reqMock, res: resMock})
+  const context = () => ({ 
+      req: reqMock, 
+      res: resMock,
+      dataSources: () => ({ db })
+  })
+
   const server = new Server({
-    dataSources: () => ({ db }),
     context,
+    dataSources: () => ({ db })
   });
 
   const { mutate, query } = createTestClient(server);

@@ -26,7 +26,7 @@ export default {
         });
       }
 
-      console.log('##### users', context.dataSources.db.getUsers())
+      console.log('##### users', context.dataSources.db.allUsers())
 
       // get User
       const user = context.dataSources.db.getUserByEmail(email);
