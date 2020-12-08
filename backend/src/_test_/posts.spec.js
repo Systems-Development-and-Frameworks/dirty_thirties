@@ -15,10 +15,6 @@ describe('posts', () => {
   let resMock;
   let reqMock;
 
-  let server;
-  let mutate;
-  let query;
-
   beforeEach(() => {
     db = new InMemoryDataSource();
     db.users = [
@@ -27,19 +23,17 @@ describe('posts', () => {
       new User('Nele H.', 'nele@email.com', 'tiramisu')
     ];
 
-     server = new Server({
-      dataSources: () => ({ db }),
-      context: () => ({
-        req: reqMock,
-        res: resMock,
-      }),
-    });
-  
-    const testServer = createTestClient(server);
-    mutate  = testServer.mutate;
-    query = testServer.query;
+    reqMock = { headers: {} }
+    resMock = {}
   });
 
+  const context = () => ({ req: reqMock, res: resMock})
+  const server = new Server({
+    dataSources: () => ({ db }),
+    context,
+  });
+
+  const { mutate, query } = createTestClient(server);
 
   describe('query posts', () => {
     it('returns an empty post array', async () => {
