@@ -72,8 +72,6 @@ export default {
     },
 
     write: (parent, args, context) => {
-      console.log(args, args.post);
-
       const newPost = {
         title: args.post.title,
         authorid: context.req.auth.id,
@@ -93,44 +91,19 @@ export default {
       return context.dataSources.db.upvotePost(post.id, context.req.auth.id);
     },
 
-    downvotePost: (parent, args, context) => {
-      const voter = context.dataSources.db.getUser(args.userId);
-      if (!voter) {
-        throw new UserInputError('Invalid user', {
-          invalidArgs: 'Userid does not exist',
-        });
-      }
-
+    downvote: (parent, args, context) => {
       const post = context.dataSources.db.getPost(args.id);
+
       if (!post) {
-        throw new UserInputError('Invalid post', { invalidArgs: args.id });
+        throw new UserInputError('Invalid post', { invalidArgs: args.postId });
       }
 
-      return context.dataSources.db.downvotePost(post.id, voter.id);
+      return context.dataSources.db.downvotePost(post.id, context.req.auth.id);
     },
 
-    deletePost: (parent, args, context) => {
-      const user = context.dataSources.db.getUser(args.userId);
-      if (!user) {
-        throw new UserInputError('Invalid user', {
-          invalidArgs: `Userid ${args.userId} does not exist`,
-        });
-      }
 
-      const post = context.dataSources.db.getPost(args.id);
-      if (!post) {
-        throw new UserInputError('Invalid post', {
-          invalidArgs: `Post ${args.id} does not exist`,
-        });
-      }
-
-      if (post.authorid !== user.id) {
-        throw new UserInputError('Not Allowed', {
-          invalidArgs: `User does not create the post and can not delete it`,
-        });
-      }
-
-      return context.dataSources.db.deletePost(post.id);
+    delete: (parent, args, context) => {
+      return context.dataSources.db.deletePost(args.id);
     },
   },
 

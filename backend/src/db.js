@@ -22,7 +22,6 @@ export class User {
 export class InMemoryDataSource extends DataSource {
   constructor () {
     super();
-    console.log('constructor of the InMemoryDataSource');
     this.posts = [];
     this.users = [];
   }

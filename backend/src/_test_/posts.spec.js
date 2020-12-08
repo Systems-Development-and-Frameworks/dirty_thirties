@@ -1,48 +1,58 @@
 import { createTestClient } from 'apollo-server-testing';
-import { gql } from 'apollo-server';
 import Server from '../server.js';
-import { InMemoryDataSource, User, Post } from '../db.js';
+import { InMemoryDataSource, Post, User } from '../db.js';
+import {
+  QUERY_POSTS,
+  MUTATION_WRITE_POST,
+  MUTATION_UPVOTE_POST,
+  MUTATION_DOWNVOTE_POST,
+  MUTATION_DELETE_POST,
+} from './utils/gql.js';
+import { loginUser } from './utils/helpers';
 
-const TEST_USER_ID = 'e8a2d505ae85c351f2dbe5cd15c064d5';
+describe('posts', () => {
+  let db;
+  let resMock;
+  let reqMock;
 
-let db;
-beforeEach(() => {
-  db = new InMemoryDataSource();
+  beforeEach(() => {
+    db = new InMemoryDataSource();
+    db.users = [
+      new User('Jenny V.', 'jenny@email.com', 'cheescake'), 
+      new User('Sarah M.', 'sarah@email.com', 'marzipan'), 
+      new User('Nele H.', 'nele@email.com', 'tiramisu')
+    ];
+  });
 
-  const testUser = new User('Test User');
-  testUser.id = TEST_USER_ID;
+  const server = new Server({
+    dataSources: () => ({ db }),
+    context: () => ({
+      req: reqMock,
+      res: resMock,
+    }),
+  });
 
-  db.users.push(testUser);
-});
+  const { mutate, query } = createTestClient(server);
 
-const server = new Server({ dataSources: () => ({ db }) });
-
-const { query, mutate } = createTestClient(server);
-
-describe('query', () => {
-  describe('POSTS', () => {
-    const POSTS = gql`
-      query {
-        posts {
-          id
-          title
-        }
-      }
-    `;
-
-    //  pass
-    it('returns empty array', async () => {
-      await expect(query({ query: POSTS })).resolves.toMatchObject({
+  describe('query posts', () => {
+    it('returns an empty post array', async () => {
+      await expect(query({ query: QUERY_POSTS })).resolves.toMatchObject({
         errors: undefined,
         data: { posts: [] },
       });
     });
 
-    //  pass
     it('given some posts in the database and return it', async () => {
-      db.posts = [new Post({ title: 'Some post', authorId: '1234' })];
+      // create a post
+      db.posts = [
+        new Post({
+          title: 'Some post',
+          authorid: db.users[0].id,
+          votes: 0,
+        }),
+      ];
 
-      await expect(query({ query: POSTS })).resolves.toMatchObject({
+      await expect(query({ query: QUERY_POSTS })).resolves.toMatchObject({
         errors: undefined,
         data: {
           posts: [
@@ -55,180 +65,330 @@ describe('query', () => {
       });
     });
   });
-});
 
-describe('mutations', () => {
-  describe('CREATE_POST', () => {
-    const CREATE_POST = gql`
-      mutation($postTitle: String!, $userId: ID!) {
-        createPost(title: $postTitle, userId: $userId) {
-          id
-          title
-          votes
-          author {
-            name
-          }
-        }
-      }
-    `;
+  describe('write posts', () => {
+    it('can not create a post, if the user is not authenticated', async () => {
+      reqMock = { headers: { authorization: null } };
 
-    const createPost = () =>
-      mutate({
-        mutation: CREATE_POST,
+      const { errors } = await mutate({
+        mutation: MUTATION_WRITE_POST,
         variables: {
-          postTitle: 'Some post',
-          userId: TEST_USER_ID,
+          post: { title: 'a test post' },
         },
       });
 
-    const invalidUser = () =>
-      mutate({
-        mutation: CREATE_POST,
-        variables: {
-          postTitle: 'Some post',
-          userId: 'INVALID_ID_123',
-        },
-      });
-
-    // pass
-    it('throws error when user is invalid', async () => {
-      const {
-        errors: [error],
-      } = await invalidUser();
-
-      expect(error.message).toEqual('Invalid user');
+      expect(errors[0].message).toContain('Not Authorised!');
     });
 
-    // pass
-    it('adds a post to db.posts', async () => {
+    it('an authenticated user can write a new post', async () => {
+      const token = await loginUser(mutate);
+
+      reqMock = { headers: { authorization: token } };
+
+      const writePostMutation = mutate({
+        mutation: MUTATION_WRITE_POST,
+        variables: {
+          post: { title: 'a test post' },
+        },
+      });
+
+      await expect(writePostMutation).resolves.toMatchObject({
+        errors: undefined,
+        data: {
+          write: {
+            title: 'a test post',
+            id: expect.any(String),
+            author: { name: 'Sarah M.' },
+          },
+        },
+      });
+    });
+
+    it('the post ist added to db.posts', async () => {
+      const token = await loginUser(mutate);
+
+      reqMock = { headers: { authorization: token } };
+
       expect(db.posts).toHaveLength(0);
-      await createPost();
+
+      await mutate({
+        mutation: MUTATION_WRITE_POST,
+        variables: {
+          post: { title: 'a test post' },
+        },
+      });
+
       expect(db.posts).toHaveLength(1);
     });
 
-    // pass
-    it('calls db.createPost', async () => {
-      db.createPost = jest.fn(() => {});
-      await createPost();
-      expect(db.createPost).toHaveBeenCalledWith({
-        title: 'Some post',
-        authorid: TEST_USER_ID,
-        votes: 0,
-      });
-    });
+    it('write post responds with propper mutation', async () => {
+      const token = await loginUser(mutate);
 
-    // pass
-    it('responds with created post', async () => {
-      await expect(createPost()).resolves.toMatchObject({
-        errors: undefined,
-        data: {
-          createPost: {
-            title: 'Some post',
-            id: expect.any(String),
-            votes: 0,
-            author: { name: 'Test User' },
-          },
+      reqMock = { headers: { authorization: token } };
+
+      const { data } = await mutate({
+        mutation: MUTATION_WRITE_POST,
+        variables: {
+          post: { title: 'a test post' },
         },
       });
+
+      expect(data).toHaveProperty('write');
     });
   });
 
-  describe('VOTE_POST', () => {
-    let TEST_POST_ID;
+  describe('upvote posts', () => {
+    it('upvote a post can not be called by not an authenticated user', async () => {
+      reqMock = { headers: { authorization: null } };
 
-    beforeEach(() => {
-      db.posts = [new Post({ title: 'Some post', authorId: TEST_USER_ID })];
-      TEST_POST_ID = db.posts[0].id;
+      const { errors } = await mutate({
+        mutation: MUTATION_UPVOTE_POST,
+        variables: {
+          id: 1234,
+        },
+      });
+
+      expect(errors[0].message).toContain('Not Authorised!');
     });
 
-    describe('UPVOTE_POST', () => {
-      const UPVOTE_POST = gql`
-        mutation($id: ID!, $userId: ID!) {
-          upvotePost(id: $id, userId: $userId) {
-            title
-            id
-            author {
-              name
-            }
-            votes
-          }
-        }
-      `;
+    it('upvote a post can only be called by an authenticated user', async () => {
+      const token = await loginUser(mutate);
 
-      const upvote = () =>
-        mutate({
-          mutation: UPVOTE_POST,
-          variables: { id: TEST_POST_ID, userId: TEST_USER_ID },
-        });
+      reqMock = { headers: { authorization: token } };
 
-      // pass
-      it('calls db.upvotePost', async () => {
-        db.upvotePost = jest.fn(() => {});
+      // create post
+      db.posts = [new Post({ title: 'a test post', authorid: db.users[0].id })]
 
-        await upvote();
+      // query posts
+      const {data:{posts}} = await query({ query: QUERY_POSTS });
 
-        expect(db.upvotePost).toHaveBeenCalledWith(TEST_POST_ID, TEST_USER_ID);
+      const { data } = await mutate({
+        mutation: MUTATION_UPVOTE_POST,
+        variables: {
+          id: posts[0].id,
+        },
       });
 
-      // pass
-      it('throws error when post id invalid', async () => {
-        const invalidId = () =>
-          mutate({
-            mutation: UPVOTE_POST,
-            variables: { id: 123, userId: TEST_USER_ID },
-          });
+      expect(data.upvote).toHaveProperty('votes', 1);
+    });
 
-        const {
-          errors: [error],
-        } = await invalidId();
+    it('throws an error, when the post id is invalid', async () => {
+      const token = await loginUser(mutate);
 
-        expect(error.message).toEqual('Invalid post');
+      reqMock = { headers: { authorization: token } };
+
+      const { errors } = await mutate({
+        mutation: MUTATION_UPVOTE_POST,
+        variables: {
+          id: 1234,
+        },
       });
 
-      // pass
-      it('throws error when user is invalid', async () => {
-        const invalidUser = () =>
-          mutate({
-            mutation: UPVOTE_POST,
-            variables: { id: TEST_POST_ID, userId: 'INVALID_USER_ID' },
-          });
+      expect(errors[0].message).toContain('Invalid post');
+    });
 
-        const {
-          errors: [error],
-        } = await invalidUser();
+    it('a logged in user can not upvote the same post multiple times', async () => {
+      const token = await loginUser(mutate);
 
-        expect(error.message).toEqual('Invalid user');
+      reqMock = { headers: { authorization: token } };
+
+      // create post
+      db.posts = [new Post({ title: 'a test post', authorid: db.users[0].id })]
+
+      // query posts
+      const {data:{posts}} = await query({ query: QUERY_POSTS });
+      const postId = posts[0].id;
+
+      // first upvote
+      await mutate({
+        mutation: MUTATION_UPVOTE_POST,
+        variables: {
+          id: postId,
+        },
       });
 
-      it('upvotes post', async () => {
-        await expect(upvote()).resolves.toMatchObject({
-          errors: undefined,
-          data: {
-            upvotePost: {
-              title: 'Some post',
-              id: expect.any(String),
-              votes: 1,
-              author: null, // todo fix it { name: 'Test User' },
-            },
-          },
-        });
+      // second upvote
+      const { data } = await mutate({
+        mutation: MUTATION_UPVOTE_POST,
+        variables: {
+          id: postId,
+        },
       });
 
-      it('a user can not upvote multiple times', async () => {
-        await upvote();
+      expect(data.upvote).toHaveProperty('votes', 1);
+    });
 
-        await expect(upvote()).resolves.toMatchObject({
-          errors: undefined,
-          data: {
-            upvotePost: {
-              title: 'Some post',
-              id: expect.any(String),
-              votes: 1,
-              author: null, // todo fix it { name: 'Test User' },
-            },
-          },
-        });
+    it('upvote post is called', async () => {
+      const token = await loginUser(mutate);
+
+      reqMock = { headers: { authorization: token } };
+
+      // mock function
+      db.upvotePost = jest.fn(() => {});
+
+      // seed posts
+      db.posts = [new Post({ title: 'a test post', authorid: db.users[0].id })]
+
+      // query posts
+      const postData = await query({ query: QUERY_POSTS });
+
+      await mutate({
+        mutation: MUTATION_UPVOTE_POST,
+        variables: {
+          id: postData.data.posts[0].id,
+        },
       });
+
+      expect(db.upvotePost).toHaveBeenCalledTimes(1);
+    });
+  });
+
+  describe('downvote posts', () => {
+    it('downvote a post can not be called by not an authenticated user', async () => {
+      reqMock = { headers: { authorization: null } };
+
+      const { errors } = await mutate({
+        mutation: MUTATION_DOWNVOTE_POST,
+        variables: {
+          id: 1234,
+        },
+      });
+
+      expect(errors[0].message).toContain('Not Authorised!');
+    });
+
+    it('downvote a post can only be called by an authenticated user', async () => {
+      const token = await loginUser(mutate);
+
+      reqMock = { headers: { authorization: token } };
+
+      // seed posts
+      db.posts = [new Post({ title: 'a test post', authorid: db.users[0].id })]
+
+      // query posts
+      const {data:{posts}} = await query({ query: QUERY_POSTS });
+
+      const postId = posts[0].id;
+
+      const { errors } = await mutate({
+        mutation: MUTATION_DOWNVOTE_POST,
+        variables: {
+          id: postId,
+        },
+      });
+
+      expect(errors).not.toBeDefined();
+    });
+
+    it('throws an error, when the post id is invalid', async () => {
+      const token = await loginUser(mutate);
+
+      reqMock = { headers: { authorization: token } };
+
+      const { errors } = await mutate({
+        mutation: MUTATION_DOWNVOTE_POST,
+        variables: {
+          id: 1234,
+        },
+      });
+
+      expect(errors[0].message).toContain('Invalid post');
+    });
+
+    it('a post can be up and downvoted', async () => {
+      const token = await loginUser(mutate);
+
+      reqMock = { headers: { authorization: token } };
+
+      // seed posts
+      db.posts = [new Post({ title: 'a test post', authorid: db.users[0].id })]
+
+      // query posts
+      const {data:{posts}} = await query({ query: QUERY_POSTS });
+
+      const postId = posts[0].id;
+
+      await mutate({
+        mutation: MUTATION_UPVOTE_POST,
+        variables: {
+          id: postId,
+        },
+      });
+
+      const { data } = await mutate({
+        mutation: MUTATION_DOWNVOTE_POST,
+        variables: {
+          id: postId,
+        },
+      });
+
+      expect(data.downvote).toHaveProperty('votes', 0);
+    });
+
+    // todo: a post can have a negativ vote count
+  });
+
+  describe('delete post', () => {
+    it('a post can not be deleted by not an authenticated user', async () => {
+      reqMock = { headers: { authorization: null } };
+
+      const { errors } = await mutate({
+        mutation: MUTATION_DELETE_POST,
+        variables: {
+          id: 1234,
+        },
+      });
+
+      expect(errors[0].message).toContain('Not Authorised!');
+    });
+
+    it("an authenticaed user can not delete other users' posts", async () => {
+      const token = await loginUser(mutate);
+
+      reqMock = { headers: { authorization: token } };
+
+      // seed posts
+      db.posts = [new Post({ title: 'a test post', authorid: db.users[0].id })]
+
+      // query posts
+      const {data:{posts}} = await query({ query: QUERY_POSTS });
+
+      const postId = posts[0].id;
+
+      const { errors } = await mutate({
+        mutation: MUTATION_DELETE_POST,
+        variables: {
+          id: postId,
+        },
+      });
+
+      expect(errors[0].message).toContain('Not Authorised!');
+    });
+
+    it('an authenticaed user can delete their own posts', async () => {
+      const token = await loginUser(mutate);
+
+      reqMock = { headers: { authorization: token } };
+
+      // create posts
+      db.posts = [
+        new Post({ title: 'a test post', authorid: db.users[0].id }),
+        new Post({ title: 'an awesome post', authorid: db.users[1].id }),
+      ]
+
+      // query posts
+      const {data:{posts}} = await query({ query: QUERY_POSTS });
+
+      const postId = posts[1].id;
+
+      const { data } = await mutate({
+        mutation: MUTATION_DELETE_POST,
+        variables: {
+          id: postId,
+        },
+      });
+
+      expect(data).toHaveProperty('delete');
     });
   });
 });

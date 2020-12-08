@@ -1,142 +1,49 @@
-import { gql } from 'apollo-server';
 import { createTestClient } from 'apollo-server-testing';
 import Server from '../server.js';
-import { InMemoryDataSource, User, Post } from '../db.js';
+import { InMemoryDataSource, User } from '../db.js';
 
-let TEST_USER_ID_0;
-// let TEST_USER_ID_1;
-let db;
-beforeEach(() => {
-  db = new InMemoryDataSource();
-  db.users.push(new User('Jenny V.'), new User('Sarah M.'));
+import { QUERY_USERS } from './utils/gql.js';
+import { loginUser } from './utils/helpers';
 
-  TEST_USER_ID_0 = db.users[0].id;
- // TEST_USER_ID_1 = db.users[1].id;
-});
+describe('users', () => {
+  let db;
+  let resMock;
+  let reqMock;
 
-const server = new Server({ dataSources: () => ({ db }) });
-
-const { query, mutate } = createTestClient(server);
-
-describe('queries', () => {
-  describe('USERS', () => {
-    const USERS = gql`
-      query {
-        users {
-          name
-        }
-      }
-    `;
-
-    // pass
-    it('given users in the database', async () => {
-      await expect(query({ query: USERS })).resolves.toMatchObject({
-        errors: undefined,
-        data: { users: [{ name: 'Jenny V.' }, { name: 'Sarah M.' }] },
-      });
-    });
+  beforeEach(() => {
+    db = new InMemoryDataSource();
+    db.users = [
+      new User('Jenny V.', 'jenny@email.com', 'cheescake'), 
+      new User('Sarah M.', 'sarah@email.com', 'marzipan'), 
+      new User('Nele H.', 'nele@email.com', 'tiramisu')
+    ];
   });
 
-  describe('USERS', () => {
-    const USERS = gql`
-      query {
-        users {
-          name
-          posts {
-            title
-          }
-        }
-      }
-    `;
+  const server = new Server({
+    dataSources: () => ({ db }),
+    context: () => ({
+      req: reqMock,
+      res: resMock,
+    }),
+  });
 
-    // pass
-    it('returns all users with no posts', async () => {
-      await expect(query({ query: USERS })).resolves.toMatchObject({
-        errors: undefined,
-        data: {
-          users: [
-            { name: 'Jenny V.', posts: [] },
-            { name: 'Sarah M.', posts: [] },
-          ],
-        },
-      });
-    });
+  const { mutate, query } = createTestClient(server);
 
-    describe('WRITE_POST', () => {
-      const action = () =>
-        mutate({
-          mutation: WRITE_POST,
-          variables: {
-            postTitle: 'Some post',
-            userId: TEST_USER_ID_0,
-          },
-        });
+  it('a not authenticated user can not see all users', async () => {
+    reqMock = { headers: { authorization: null } };
 
-      const WRITE_POST = gql`
-        mutation($postTitle: String!, $userId: ID!) {
-          createPost(title: $postTitle, userId: $userId) {
-            author {
-              name
-              posts {
-                title
-              }
-            }
-          }
-        }
-      `;
+    const { errors } = await query({ query: QUERY_USERS });
 
-      // pass
-      it('adds post to user', async () => {
-        await expect(action()).resolves.toMatchObject({
-          errors: undefined,
-          data: {
-            createPost: {
-              author: { name: 'Jenny V.', posts: [{ title: 'Some post' }] },
-            },
-          },
-        });
-      });
-    });
+    expect(errors[0].message).toContain('Not Authorised!');
+  });
 
-    describe('DELETE_POST', () => {
-      let DELETE_POST_ID;
+  it('an authenticated user can query all users', async () => {
+    const token = await loginUser(mutate);
 
-      beforeEach(() => {
-        db.posts = [new Post({ title: 'Some post', userId: TEST_USER_ID_0 })];
-
-        DELETE_POST_ID = db.posts[0].id;
-      });
-
-      const DELETE_POST = gql`
-        mutation($id: ID!, $userId: ID!) {
-          deletePost(id: $id, userId: $userId) {
-            author {
-              name
-              posts {
-                title
-              }
-            }
-          }
-        }
-      `;
-
-      const deletePost = () =>
-        mutate({
-          mutation: DELETE_POST,
-          variables: { id: DELETE_POST_ID, userId: TEST_USER_ID_0 },
-        });
-
-      // TODO Fix test
-      it.skip('removes post from a user', async () => {
-        console.log('DELETE_POST_ID', DELETE_POST_ID);
-        console.log(db.posts, db.users);
-        await expect(deletePost()).resolves.toMatchObject({
-          errors: undefined,
-          data: {
-            deletePost: { author: { name: 'Jenny V.', posts: [] } },
-          },
-        });
-      });
-    });
+    reqMock = { headers: { authorization: token } };
+    const {
+      data: {users},
+    } = await query({ query: QUERY_USERS });
+    expect(users).toHaveLength(3);
   });
 });

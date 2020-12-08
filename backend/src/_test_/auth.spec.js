@@ -70,6 +70,23 @@ describe('auth', () => {
       expect(errors[0].message).toContain('409');
     });
 
+    it('a new user is added to users db', async () => {
+      db.users = [];
+
+      expect(db.users).toHaveLength(0);
+
+      await mutate({
+        mutation: MUTATION_REGISTER,
+        variables: {
+          name: 'test',
+          email: 'test@example.com',
+          password: 'password',
+        },
+      });
+
+      expect(db.users).toHaveLength(1);
+    });
+
     it('throws an error, if the password is less than 8 characters', async () => {
       const { errors } = await mutate({
         mutation: MUTATION_REGISTER,

@@ -21,16 +21,12 @@ const typeDefs = gql`
     users: [User]
   }
   type Mutation {
-    # old  methods
-    downvotePost(id: ID!, userId: ID!): Post
-    deletePost(id: ID!, userId: ID!): Post
-    # new
     write(post: PostInput!): Post
     upvote(id: ID!): Post
     # 🚀 OPTIONAL
-    # downvote(id: ID!): Post
+     downvote(id: ID!): Post
     # 🚀 OPTIONAL
-    # delete(id: ID!): Post
+    delete(id: ID!): Post
     # """
     # returns a signed JWT or null
     # """
