@@ -12,7 +12,5 @@ export const loginUser = async (
     variables: { email, password },
   });
 
-  console.log('###### login',data, email , password )
-
   return data.login;
 };
