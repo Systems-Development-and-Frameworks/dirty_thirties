@@ -1,18 +1,33 @@
-![front pic](https://media-exp1.licdn.com/dms/image/C4E1BAQEMT5lSuDrcow/company-background_10000/0?e=2159024400&v=beta&t=S6Z8EbaUn5iFIKD_zc3MuRzDJnsHSBowEo9g9e9t_1A)
+WOWWWWWW exercise 4 is done... what a journey... 
 
-[![Downloads](http://pepy.tech/badge/stronghold)](http://pepy.tech/count/stronghold)
+<table>
+<tr>
+<td>
+Link to review for no-js-pls: https://github.com/Systems-Development-and-Frameworks/no-js-pls/pull/6#pullrequestreview-547931835
+</td>
+</tr>
+</table>
 
-**dirty_thirties** is the homework team consisting of Nele, Sarah & Jenny.
 
+
+## dirty_thirties is the homework team consisting of Nele, Sarah & Jenny.
 This README is created to share and publish our homework for Systems Development & Frameworks.
 
-![second pic](https://www.smartsheet.com/sites/default/files/styles/full_width_desktop/public/IC-System-Development-Lifecycle.jpg?itok=gQIZveEV)
 
-This pic gives a first impression on the topic we have to face this semester. 
+# Exercise #4
 
+| Deadline                   | Date                   |
+| -------------------------- | ---------------------- |
+| Review due date (optional) | 02.12.2020 - 14:00     |
+| **Final Due date**         | **09.12.2020 - 14:00** |
 
+## Goal
 
-# ![Backend](https://miro.medium.com/max/2000/0*6XxzUsX7UclH3Fqi.png)
+In this exercise, you're going to learn the concepts of [Authentication](https://en.wikipedia.org/wiki/Authentication) with [JWT](https://jwt.io/) and [Authorization](https://en.wikipedia.org/wiki/Authorization) with [graphql-shield](https://github.com/maticzav/graphql-shield). For the latter, you need an understanding of the "middleware" software pattern as defined by [express](https://github.com/maticzav/graphql-shield). An implementation for [apollo-server](https://github.com/apollographql/apollo-server) is [graphql-middleware](https://github.com/prisma-labs/graphql-middleware).
+
+Extend exercise [#1](../1), [#2](../2) and [#3](../3) with the new [objectives](#objectives).
+
+# ![Backend](https://securityintelligence.com/wp-content/uploads/2018/10/si-advanced-authentication-feature.jpg)
 
 # Backend
 ... and now the backend ... made with GraphQL and a Apollo Server
@@ -21,7 +36,7 @@ This pic gives a first impression on the topic we have to face this semester.
 <table>
 <tr>
 <td>
-Link to review: https://github.com/Systems-Development-and-Frameworks/no-js-pls/pull/5#pullrequestreview-536799072
+Link to review: https://github.com/Systems-Development-and-Frameworks/no-js-pls/pull/6#pullrequestreview-547931835
 </td>
 </tr>
 </table>
