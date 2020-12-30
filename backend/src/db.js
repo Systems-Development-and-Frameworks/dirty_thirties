@@ -1,5 +1,6 @@
 import { DataSource } from 'apollo-datasource';
 import crypto from 'crypto';
+import bcrypt from 'bcrypt';
 
 export class Post {
   constructor (data) {
@@ -10,16 +11,17 @@ export class Post {
 }
 
 export class User {
-    constructor(name) {
+    constructor(name, email, password) {
       this.id = crypto.randomBytes(16).toString('hex');
       this.name = name;
+      this.email = email;
+      this.password = bcrypt.hashSync(password, bcrypt.genSaltSync(12));
     }
 }
 
 export class InMemoryDataSource extends DataSource {
   constructor () {
     super();
-    console.log('constructor of the InMemoryDataSource');
     this.posts = [];
     this.users = [];
   }
@@ -32,6 +34,16 @@ export class InMemoryDataSource extends DataSource {
 
   getUser(id) {
     return this.users.find((user) => user.id === id);
+  }
+
+  getUserByEmail(email) {
+    return this.users.find((user) => user.email === email);
+  }
+
+  createUser(name, email, password) {
+    const newUser = new User(name, email, password);
+    this.users.push(newUser);
+    return newUser;
   }
 
   allPosts() {

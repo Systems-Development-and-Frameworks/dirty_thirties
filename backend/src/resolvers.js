@@ -4,6 +4,8 @@
 //3. Create a post
 //4. Upvote a post
 import { UserInputError } from 'apollo-server';
+import bcrypt from "bcrypt";
+import {createTokenFor} from './utils/jwt';
 
 export default {
   Query: {
@@ -12,78 +14,96 @@ export default {
   },
 
   Mutation: {
-    createPost: (parent, args, context) => {
-      // throw error if user does not exist
-      const user = context.dataSources.db.getUser(args.userId);
-      if (!user) {
-        throw new UserInputError('Invalid user', {
-          invalidArgs: 'Userid does not exist',
+    login: (parent, args, context) => {
+      const { email, password } = args;
+
+      if (password.length < 8) {
+        throw new UserInputError('400', {
+          invalidArgs:
+            '[Validation Errors] password is shorter then 8 characters',
         });
       }
 
+      // get User
+      const user = context.dataSources.db.getUserByEmail(email);
+
+      if (user == null) {
+        // throw not found
+        throw new UserInputError('404', {
+          invalidArgs: 'user not found',
+        });
+      }
+
+      // try to authorize
+      const canLogIn = bcrypt.compareSync(password, user.password);
+
+      if (!canLogIn) {
+        // throw 401 or return null
+        throw new UserInputError('401', {
+          invalidArgs: 'Unauthorized',
+        });
+      }
+      return 'Bearer ' + createTokenFor(user);
+    },
+
+    signup: (parent, args, context) => {
+      const { name, email, password } = args;
+
+      if (password.length < 8) {
+        throw new UserInputError('400', {
+          invalidArgs:
+            '[Validation Errors] password is shorter then 8 characters',
+        });
+      }
+
+      // try to find if the email already exist
+      const userExist = context.dataSources.db.getUserByEmail(email);
+
+      if (userExist != null) {
+        // 409 Conflict
+        throw new UserInputError('409', {
+          invalidArgs: 'Email is already taken',
+        });
+      }
+
+      const newUser = context.dataSources.db.createUser(name, email, password);
+
+      return 'Bearer ' + createTokenFor(newUser);
+    },
+
+    write: (parent, args, context) => {
       const newPost = {
-        title: args.title,
-        authorid: args.userId,
+        title: args.post.title,
+        authorid: context.req.auth.id,
         votes: 0,
       };
 
       return context.dataSources.db.createPost(newPost);
     },
-
-    upvotePost: (parent, args, context) => {
-      const voter = context.dataSources.db.getUser(args.userId);
-      if (!voter) {
-        throw new UserInputError('Invalid user', {
-          invalidArgs: 'Userid does not exist',
-        });
-      }
-
+    
+    upvote: (parent, args, context) => {
       const post = context.dataSources.db.getPost(args.id);
+
       if (!post) {
-        throw new UserInputError('Invalid post', { invalidArgs: args.id });
+        throw new UserInputError('Invalid post', { invalidArgs: args.postId });
       }
 
-      return context.dataSources.db.upvotePost(post.id, voter.id);
+      return context.dataSources.db.upvotePost(post.id, context.req.auth.id);
     },
 
-    downvotePost: (parent, args, context) => {
-      const voter = context.dataSources.db.getUser(args.userId);
-      if (!voter) {
-        throw new UserInputError('Invalid user', {
-          invalidArgs: 'Userid does not exist',
-        });
-      }
-
+    downvote: (parent, args, context) => {
       const post = context.dataSources.db.getPost(args.id);
+
       if (!post) {
-        throw new UserInputError('Invalid post', { invalidArgs: args.id });
+        throw new UserInputError('Invalid post', { invalidArgs: args.postId });
       }
 
-      return context.dataSources.db.downvotePost(post.id, voter.id);
+      return context.dataSources.db.downvotePost(post.id, context.req.auth.id);
     },
 
-    deletePost: (parent, args, context) => {
-      const user = context.dataSources.db.getUser(args.userId);
-      if (!user) {
-        throw new UserInputError('Invalid user', {
-          invalidArgs: `Userid ${args.userId} does not exist`,
-        });
-      }
 
-      const post = context.dataSources.db.getPost(args.id);
-      if (!post) {
-        throw new UserInputError('Invalid post', {
-          invalidArgs: `Post ${args.id} does not exist`,
-        });
-      }
-
-      if (post.authorid !== user.id) {
-        throw new UserInputError('Not Allowed', {
-          invalidArgs: `User does not create the post and can not delete it`,
-        });
-      }
-
-      return context.dataSources.db.deletePost(post.id);
+    delete: (parent, args, context) => {
+      return context.dataSources.db.deletePost(args.id);
     },
   },
 
