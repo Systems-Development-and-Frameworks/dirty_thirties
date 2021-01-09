@@ -13,9 +13,9 @@ describe('users', () => {
   beforeEach(() => {
     db = new InMemoryDataSource();
     db.users = [
-      new User('Jenny V.', 'jenny@email.com', 'cheescake'), 
-      new User('Sarah M.', 'sarah@email.com', 'marzipan'), 
-      new User('Nele H.', 'nele@email.com', 'tiramisu')
+      new User('Jenny V.', 'jenny@email.com', 'cheescake'),
+      new User('Sarah M.', 'sarah@email.com', 'marzipan'),
+      new User('Nele H.', 'nele@email.com', 'tiramisu'),
     ];
   });
 
@@ -41,8 +41,9 @@ describe('users', () => {
     const token = await loginUser(mutate);
 
     reqMock = { headers: { authorization: token } };
+
     const {
-      data: {users},
+      data: { users },
     } = await query({ query: QUERY_USERS });
     expect(users).toHaveLength(3);
   });

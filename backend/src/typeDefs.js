@@ -1,44 +1,51 @@
-// A schema is a collection of type definitions (hence "typeDefs")
-// that together define the "shape" of queries that are executed against
-// the data
 import { gql } from 'apollo-server';
 
-const typeDefs = gql`
-  type Post {
-    id: ID!
-    title: String!
-    votes: Int!
-    author: User
-  }
+export default gql`
   type User {
     id: ID!
     name: String!
     email: String!
     posts: [Post]
   }
+
   type Query {
-    posts: [Post]
-    users: [User]
+    profile: Person
   }
+
   type Mutation {
     write(post: PostInput!): Post
-    upvote(id: ID!): Post
+    upvote(post: PostInput!): Vote
     # 🚀 OPTIONAL
-     downvote(id: ID!): Post
+    downvote(post: PostInput!): Vote
     # 🚀 OPTIONAL
-    delete(id: ID!): Post
+    delete(post: PostInput!): Post
+
     # """
     # returns a signed JWT or null
     # """
     login(email: String!, password: String!): String
+
     # """
     # returns a signed JWT or null // Register
     # """
     signup(name: String!, email: String!, password: String!): String
+
+    # """
+    # delete user account
+    # """
+    deleteAccount(email: String!): String
   }
+
   input PostInput {
-    title: String!
+    id: ID
+    title: String
+  }
+
+  extend type Person {
+    postCount: Int
+  }
+
+  extend type Post {
+    votesCount: Int
   }
 `;
-
-export default typeDefs;

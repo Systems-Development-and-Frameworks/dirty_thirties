@@ -1,127 +1,319 @@
-
-//1. List all posts
-//2. List all users
-//3. Create a post
-//4. Upvote a post
 import { UserInputError } from 'apollo-server';
-import bcrypt from "bcrypt";
-import {createTokenFor} from './utils/jwt';
+import bcrypt from 'bcrypt';
+import { createTokenFor } from './utils/jwt';
+import { delegateToSchema } from '@graphql-tools/delegate';
+import {
+  CREATE_PERSON,
+  QUERY_USER_BY_EMAIL,
+  QUERY_USER_BY_EMAIL_W_PASSWORD,
+  QUERY_DOES_AUTHOR_HAS_POSTS,
+  QUERY_POST_VOTES,
+  DELETE_MANY_VOTES,
+} from './utils/gql';
 
-export default {
+const PASSWORD_HASH_ROUNDS = 10;
+
+export default ([{ schema, executor }]) => ({
   Query: {
-    posts: (parent, args, context) => context.dataSources.db.allPosts(),
-    users: (parent, args, context) => context.dataSources.db.allUsers(),
+    profile: async (_parent, _args, context, info) => {
+      return await delegateToSchema({
+        schema,
+        operation: 'query',
+        fieldName: 'person',
+        args: {
+          stage: 'DRAFT',
+          where: {
+            id: context.person.id,
+          },
+        },
+        context,
+        info,
+      });
+    },
   },
-
   Mutation: {
-    login: (parent, args, context) => {
+    // auth
+    login: async (_parent, args) => {
       const { email, password } = args;
 
       if (password.length < 8) {
-        throw new UserInputError('400', {
-          invalidArgs:
-            '[Validation Errors] password is shorter then 8 characters',
-        });
+        throw new UserInputError(
+          '[Validation Errors] password is shorter then 8 characters'
+        );
       }
 
       // get User
-      const user = context.dataSources.db.getUserByEmail(email);
+      const {
+        data: { person },
+      } = await executor({
+        document: QUERY_USER_BY_EMAIL_W_PASSWORD,
+        variables: { email },
+      });
 
-      if (user == null) {
+      if (person == null) {
         // throw not found
-        throw new UserInputError('404', {
-          invalidArgs: 'user not found',
-        });
+        throw new UserInputError('User not found');
       }
 
       // try to authorize
-      const canLogIn = bcrypt.compareSync(password, user.password);
+      const canLogIn = bcrypt.compareSync(password, person.password);
 
       if (!canLogIn) {
         // throw 401 or return null
-        throw new UserInputError('401', {
-          invalidArgs: 'Unauthorized',
-        });
+        throw new UserInputError('Unauthorized');
       }
-      return 'Bearer ' + createTokenFor(user);
+
+      return 'Bearer ' + createTokenFor(person.id);
     },
 
-    signup: (parent, args, context) => {
+    signup: async (_parent, args) => {
       const { name, email, password } = args;
 
       if (password.length < 8) {
-        throw new UserInputError('400', {
-          invalidArgs:
-            '[Validation Errors] password is shorter then 8 characters',
-        });
+        throw new UserInputError(
+          '[Validation Errors] password is shorter then 8 characters'
+        );
       }
 
-      // try to find if the email already exist
-      const userExist = context.dataSources.db.getUserByEmail(email);
+      const {
+        data: { person },
+      } = await executor({
+        document: QUERY_USER_BY_EMAIL,
+        variables: { email },
+      });
 
-      if (userExist != null) {
-        // 409 Conflict
-        throw new UserInputError('409', {
-          invalidArgs: 'Email is already taken',
-        });
+      // if person id exists throw error
+      if (person && person.id) {
+        throw new UserInputError('Email already exists.');
       }
 
-      const newUser = context.dataSources.db.createUser(name, email, password);
+      const passwordHash = await bcrypt.hash(
+        password,
+        await bcrypt.genSalt(PASSWORD_HASH_ROUNDS)
+      );
 
-      return 'Bearer ' + createTokenFor(newUser);
+      const {
+        data: { createPerson },
+      } = await executor({
+        document: CREATE_PERSON,
+        variables: { name, email, password: passwordHash },
+      });
+
+      return 'Bearer ' + createTokenFor(createPerson.id);
     },
 
-    write: (parent, args, context) => {
-      const newPost = {
-        title: args.post.title,
-        authorid: context.req.auth.id,
-        votes: 0,
+    /**
+     * Create for testing
+     *
+     * @param {*} _parent
+     * @param {*} _args
+     * @param {*} context
+     * @param {*} info
+     */
+    deleteAccount: async (_parent, _args, context, info) => {
+      console.log('deleteAccount', context.person);
+
+      return await delegateToSchema({
+        schema,
+        operation: 'mutation',
+        fieldName: 'deletePerson',
+        args: {
+          stage: 'DRAFT',
+          where: {
+            id: context.person.id,
+          },
+        },
+        context,
+        info,
+      });
+    },
+
+    // posts
+    write: async (_parent, args, context, info) => {
+      // auth id
+      const post = {
+        data: {
+          title: args.post.title,
+          author: {
+            connect: { id: context.person.id },
+          },
+        },
       };
 
-      return context.dataSources.db.createPost(newPost);
+      return await delegateToSchema({
+        schema,
+        operation: 'mutation',
+        fieldName: 'createPost',
+        args: post,
+        context,
+        info,
+      });
     },
-    
-    upvote: (parent, args, context) => {
-      const post = context.dataSources.db.getPost(args.id);
 
-      if (!post) {
-        throw new UserInputError('Invalid post', { invalidArgs: args.postId });
+    upvote: async (_parent, args, context, info) => {
+      const {
+        data: { votes },
+      } = await executor({
+        document: QUERY_POST_VOTES,
+        variables: {
+          userId: context.person.id,
+          postId: args.post.id,
+        },
+      });
+
+      const vote = {
+        data: {
+          value: 1,
+          votedBy: {
+            connect: { id: context.person.id },
+          },
+          post: {
+            connect: { id: args.post.id },
+          },
+        },
+      };
+      // check if user has voted and post is upvote (+1)
+      // if so, do nothing
+      if (votes.length > 0 && votes[0].value == 1) {
+        console.log('[upvote] user has upvoted, doing nothing...');
+
+        return;
       }
 
-      return context.dataSources.db.upvotePost(post.id, context.req.auth.id);
-    },
+      // check if user has voted and post is downvoted (+1)
+      // if so, update value on vote
+      const doesPostExistAndIsUpvoted =
+        votes.length > 0 && votes[0].value == -1;
 
-    downvote: (parent, args, context) => {
-      const post = context.dataSources.db.getPost(args.id);
-
-      if (!post) {
-        throw new UserInputError('Invalid post', { invalidArgs: args.postId });
+      if (doesPostExistAndIsUpvoted) {
+        console.log('[upvote] post is downvotes, updating...');
+        // updat query
+        vote.where = { id: votes[0].id };
       }
 
-      return context.dataSources.db.downvotePost(post.id, context.req.auth.id);
+      console.log('[upvote] create a new vote for post');
+      // otherwise create a new vote
+
+      return await delegateToSchema({
+        schema,
+        operation: 'mutation',
+        fieldName: doesPostExistAndIsUpvoted ? 'updateVote' : 'createVote',
+        args: vote,
+        context,
+        info,
+      });
     },
 
+    downvote: async (_parent, args, context, info) => {
+      const {
+        data: { votes },
+      } = await executor({
+        document: QUERY_POST_VOTES,
+        variables: {
+          userId: context.person.id,
+          postId: args.post.id,
+        },
+      });
 
-    delete: (parent, args, context) => {
-      return context.dataSources.db.deletePost(args.id);
+      const vote = {
+        data: {
+          value: -1,
+          votedBy: {
+            connect: { id: context.person.id },
+          },
+          post: {
+            connect: { id: args.post.id },
+          },
+        },
+      };
+
+      // check if user has voted and post is downvoted (-1)#
+      // if so , do nothing
+      if (votes.length > 0 && votes[0].value == -1) {
+        console.log('[downvote] user has downvoted, doing nothing...');
+
+        return;
+      }
+
+      // check if user has voted and post is upvoted (1)
+      // if so, update value on vote
+      const doesPostExistAndIsUpvoted = votes.length > 0 && votes[0].value == 1;
+
+      if (doesPostExistAndIsUpvoted) {
+        console.log('[downvote] post is upvoted, updating...');
+
+        // updat query
+        vote.where = { id: votes[0].id };
+      }
+
+      // otherwise create a new vote
+      return await delegateToSchema({
+        schema,
+        operation: 'mutation',
+        fieldName: doesPostExistAndIsUpvoted ? 'updateVote' : 'createVote',
+        args: vote,
+        context,
+        info,
+      });
+    },
+
+    delete: async (_parent, args, context, info) => {
+      const {
+        data: { posts },
+      } = await executor({
+        document: QUERY_DOES_AUTHOR_HAS_POSTS,
+        variables: {
+          postId: args.post.id,
+          userId: context.person.id,
+        },
+      });
+
+      // throw error if no posts avilable
+      if (!posts.length) {
+        throw new UserInputError(
+          'This is not your post or post does not exist!'
+        );
+      }
+
+      // delete all associated votes
+      const {
+        data: {
+          deleteManyVotesConnection: { pageInfo },
+        },
+      } = await executor({
+        document: DELETE_MANY_VOTES,
+      });
+
+      console.log('deletedCount', pageInfo.pageSize);
+
+      return await delegateToSchema({
+        schema,
+        operation: 'mutation',
+        fieldName: 'deletePost',
+        args: {
+          stage: 'DRAFT',
+          where: {
+            id: args.post.id,
+          },
+        },
+        context,
+        info,
+      });
+    },
+  },
+
+  Person: {
+    postCount: {
+      selectionSet: '{ posts { id } }',
+      resolve: (person) => person.posts.length,
     },
   },
 
   Post: {
-    author(obj, args, context) {
-      return context.dataSources.db.getUser(obj.authorid);
-    },
-    votes(obj) {
-      return obj.voters.size;
-    },
-  },
-
-  //Users - allPosts
-  User: {
-    posts(obj, args, context) {
-      return context.dataSources.db
-        .allPosts()
-        .filter((post) => post.authorid === obj.id);
+    votesCount: {
+      selectionSet: '{ votes {value} }',
+      resolve: (post) =>
+        post.votes.map((v) => v.value).reduce((a, b) => (a += b), 0),
     },
   },
-};
+});

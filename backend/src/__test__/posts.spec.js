@@ -10,32 +10,19 @@ import {
 } from './utils/gql.js';
 import { loginUser } from './utils/helpers';
 
+jest.mock('./../graphCms/schema');
+
+let query;
+let mutate;
+let contextMock;
+
 describe('posts', () => {
-  let db;
-  let resMock;
-  let reqMock;
-
-  beforeEach(() => {
-    db = new InMemoryDataSource();
-    db.users = [
-      new User('Jenny V.', 'jenny@email.com', 'cheescake'), 
-      new User('Sarah M.', 'sarah@email.com', 'marzipan'), 
-      new User('Nele H.', 'nele@email.com', 'tiramisu')
-    ];
-
-    reqMock = { headers: {} }
-    resMock = {}
+  beforeEach(async () => {
+    contextMock = {};
+    const server = await Server(ApolloServer, { context: () => contextMock });
+    const testClient = createTestClient(server);
+    ({ query, mutate } = testClient);
   });
-
-  const server = new Server({
-    dataSources: () => ({ db }),
-    context: () => ({
-      req: reqMock,
-      res: resMock,
-    }),
-  });
-
-  const { mutate, query } = createTestClient(server);
 
   describe('query posts', () => {
     it('returns an empty post array', async () => {
@@ -160,10 +147,12 @@ describe('posts', () => {
       reqMock = { headers: { authorization: token } };
 
       // create post
-      db.posts = [new Post({ title: 'a test post', authorid: db.users[0].id })]
+      db.posts = [new Post({ title: 'a test post', authorid: db.users[0].id })];
 
       // query posts
-      const {data:{posts}} = await query({ query: QUERY_POSTS });
+      const {
+        data: { posts },
+      } = await query({ query: QUERY_POSTS });
 
       const { data } = await mutate({
         mutation: MUTATION_UPVOTE_POST,
@@ -196,10 +185,12 @@ describe('posts', () => {
       reqMock = { headers: { authorization: token } };
 
       // create post
-      db.posts = [new Post({ title: 'a test post', authorid: db.users[0].id })]
+      db.posts = [new Post({ title: 'a test post', authorid: db.users[0].id })];
 
       // query posts
-      const {data:{posts}} = await query({ query: QUERY_POSTS });
+      const {
+        data: { posts },
+      } = await query({ query: QUERY_POSTS });
       const postId = posts[0].id;
 
       // first upvote
@@ -230,7 +221,7 @@ describe('posts', () => {
       db.upvotePost = jest.fn(() => {});
 
       // seed posts
-      db.posts = [new Post({ title: 'a test post', authorid: db.users[0].id })]
+      db.posts = [new Post({ title: 'a test post', authorid: db.users[0].id })];
 
       // query posts
       const postData = await query({ query: QUERY_POSTS });
@@ -266,10 +257,12 @@ describe('posts', () => {
       reqMock = { headers: { authorization: token } };
 
       // seed posts
-      db.posts = [new Post({ title: 'a test post', authorid: db.users[0].id })]
+      db.posts = [new Post({ title: 'a test post', authorid: db.users[0].id })];
 
       // query posts
-      const {data:{posts}} = await query({ query: QUERY_POSTS });
+      const {
+        data: { posts },
+      } = await query({ query: QUERY_POSTS });
 
       const postId = posts[0].id;
 
@@ -304,10 +297,12 @@ describe('posts', () => {
       reqMock = { headers: { authorization: token } };
 
       // seed posts
-      db.posts = [new Post({ title: 'a test post', authorid: db.users[0].id })]
+      db.posts = [new Post({ title: 'a test post', authorid: db.users[0].id })];
 
       // query posts
-      const {data:{posts}} = await query({ query: QUERY_POSTS });
+      const {
+        data: { posts },
+      } = await query({ query: QUERY_POSTS });
 
       const postId = posts[0].id;
 
@@ -351,10 +346,12 @@ describe('posts', () => {
       reqMock = { headers: { authorization: token } };
 
       // seed posts
-      db.posts = [new Post({ title: 'a test post', authorid: db.users[0].id })]
+      db.posts = [new Post({ title: 'a test post', authorid: db.users[0].id })];
 
       // query posts
-      const {data:{posts}} = await query({ query: QUERY_POSTS });
+      const {
+        data: { posts },
+      } = await query({ query: QUERY_POSTS });
 
       const postId = posts[0].id;
 
@@ -377,10 +374,12 @@ describe('posts', () => {
       db.posts = [
         new Post({ title: 'a test post', authorid: db.users[0].id }),
         new Post({ title: 'an awesome post', authorid: db.users[1].id }),
-      ]
+      ];
 
       // query posts
-      const {data:{posts}} = await query({ query: QUERY_POSTS });
+      const {
+        data: { posts },
+      } = await query({ query: QUERY_POSTS });
 
       const postId = posts[1].id;
 

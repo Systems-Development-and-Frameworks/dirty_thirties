@@ -1,45 +1,8 @@
-//import of schema, resolver, Server and DataSource
-import { ApolloServer } from 'apollo-server';
-import typeDefs from './typeDefs';
-import { Post, User, InMemoryDataSource } from './db';
-import resolvers from './resolvers';
-import { applyMiddleware } from 'graphql-middleware';
-import { makeExecutableSchema } from 'graphql-tools';
-import permissions from './middleware/permissions';
+import Schema from './schema';
+import context from './context';
 
-const db = new InMemoryDataSource();
+export default async (ApolloServer, opts) => {
+  const schema = await Schema();
 
-// create Users
-db.users = [
-  new User('Jenny V.', 'jenny@email.com', 'cheescake'), 
-  new User('Sarah M.', 'sarah@email.com', 'marzipan'), 
-  new User('Nele H.', 'nele@email.com', 'tiramisu')
-];
-
-// create posts
-db.posts = [
-  new Post({ title: 'a test post', authorid: db.users[0].id }),
-  new Post({ title: 'an exciting post', authorid: db.users[1].id }),
-  new Post({ title: 'an new post', authorid: db.users[1].id }),
-];
-
-const dataSources = () => ({ db });
-const context = ({ req, res }) => ({ req, res });
-
-const schema = applyMiddleware(
-  makeExecutableSchema({ typeDefs, resolvers }),
-  permissions
-);
-
-export default class Server {
-  // The ApolloServer constructor requires two parameters: your schema
-  // definition and your set of resolvers.
-  constructor(opts) {
-    const defaults = {
-      schema,
-      dataSources,
-      context,
-    };
-    return new ApolloServer({ ...defaults, ...opts });
-  }
-}
+  return new ApolloServer({ schema, context, ...opts });
+};

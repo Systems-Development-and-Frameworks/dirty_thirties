@@ -13,6 +13,12 @@ export const MUTATION_REGISTER = gql`
   }
 `;
 
+export const MUTATION_DELETE_ACCOUNT = gql`
+  mutation($email: String!) {
+    deleteAccount(email: $email)
+  }
+`;
+
 // Users
 export const QUERY_USERS = gql`
   query {
