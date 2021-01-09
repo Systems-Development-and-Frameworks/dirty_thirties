@@ -6,7 +6,7 @@ import { FilterObjectFields } from '@graphql-tools/wrap';
 import typeDefs from './typeDefs';
 import Resolvers from './resolvers';
 import permissions from './middleware/permissions';
-import GraphCmsSchema, { executor } from './graphCms/schema';
+import GraphCmsSchema, { executor } from './graphCMS/schema';
 
 export default async () => {
   const transforms = [
