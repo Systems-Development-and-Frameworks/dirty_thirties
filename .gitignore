@@ -128,7 +128,7 @@ dist
 .vscode-test
 
 #git-crypt
-git-crypt-key/
+.git-crypt-key
 
 # local env files
 .env.local
