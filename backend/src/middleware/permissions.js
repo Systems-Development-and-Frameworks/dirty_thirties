@@ -1,5 +1,4 @@
 import { rule, shield, allow, deny } from 'graphql-shield';
-import { verifyToken } from './../utils/jwt';
 
 import { ForbiddenError } from 'apollo-server';
 
@@ -36,25 +35,6 @@ const isAuthenticated = rule({ cache: 'contextual' })(
   }
 );
 
-const isOwner = rule({ cache: 'no_cache' })(async (_parent, args, ctx) => {
-  let token = ctx.req.headers.authorization;
-
-  try {
-    const decodedUser = verifyToken(token);
-
-    const user = ctx.dataSources.db.getUser(decodedUser.id);
-    const post = ctx.dataSources.db.getPost(args.id);
-
-    if (user && post) {
-      ctx.req.auth = user;
-      return post.authorid === user.id;
-    }
-  } catch (error) {
-    return false;
-  }
-
-  return false;
-});
 
 // Permissions
 const permissions = shield(
@@ -78,7 +58,7 @@ const permissions = shield(
       write: isAuthenticated,
       upvote: isAuthenticated,
       downvote: isAuthenticated,
-      delete: isAuthenticated, //isOwner,
+      delete: isAuthenticated,
     },
   },
   {

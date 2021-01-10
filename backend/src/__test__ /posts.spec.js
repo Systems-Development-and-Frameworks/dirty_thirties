@@ -149,7 +149,7 @@ describe('posts', () => {
     });
 
     // skip for now: See explanation in the auth test
-    it.skip('the post ist added to db.posts', async () => {
+/*     it.skip('the post ist added to db.posts', async () => {
       const token = await loginUser(mutate);
 
       reqMock = { headers: { authorization: token } };
@@ -164,7 +164,7 @@ describe('posts', () => {
       });
 
       expect(db.posts).toHaveLength(1);
-    });
+    }); */
 
     it('write post responds with propper mutation', async () => {
       // login user
@@ -355,7 +355,7 @@ describe('posts', () => {
     // skip for now: since we test on a live db
     // we assue that the nessesary methods
     // are called
-    it.skip('upvote post is called', async () => {
+    /* it.skip('upvote post is called', async () => {
       const token = await loginUser(mutate);
 
       reqMock = { headers: { authorization: token } };
@@ -378,7 +378,7 @@ describe('posts', () => {
 
       expect(db.upvotePost).toHaveBeenCalledTimes(1);
     });
-  });
+  }); */
 
   describe('downvote posts', () => {
     it('downvote a post can not be called by not an authenticated user', async () => {
@@ -653,4 +653,4 @@ describe('posts', () => {
       expect(data).toHaveProperty('delete');
     });
   });
-});
+})})
