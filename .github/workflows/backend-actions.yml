@@ -18,8 +18,8 @@ jobs:
       - run: |
               npm ci
               npm run test
-        env: 
-          JWT_KEY: 'pipelineSecret123#'
+      env:
+          GIT_CRYPT_KEY:
     
     lint:
       name: lint in backend
