@@ -2,7 +2,6 @@ import jwt from 'jsonwebtoken';
 import { JWT_SECRET } from './config';
 
 export default function context({ req }) {
-  console.log('context', req);
   let token = req.headers.authorization || '';
   token = token.replace('Bearer ', '');
 

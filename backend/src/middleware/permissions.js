@@ -29,7 +29,9 @@ const isAuthenticated = rule({ cache: 'no_cache' })(
 
 const isAuthenticated = rule({ cache: 'contextual' })(
   async (_parent, _args, context) => {
-    console.log('rule:isAuthenticated ', context);
+    if (context.person == undefined) {
+      return 'Not Authorised!';
+    }
     return !!context.person.id;
   }
 );

@@ -20,6 +20,13 @@ export const MUTATION_DELETE_ACCOUNT = gql`
 `;
 
 // Users
+export const QUERY_PROFILE = gql`
+  query {
+    profile {
+      name
+    }
+  }
+`;
 export const QUERY_USERS = gql`
   query {
     users {
@@ -62,31 +69,28 @@ export const MUTATION_WRITE_POST = gql`
 `;
 
 export const MUTATION_UPVOTE_POST = gql`
-  mutation($id: ID!) {
-    upvote(id: $id) {
+  mutation($post: PostInput!) {
+    upvote(post: $post) {
       id
-      title
-      votes
+      value
     }
   }
 `;
 
 export const MUTATION_DOWNVOTE_POST = gql`
-  mutation($id: ID!) {
-    downvote(id: $id) {
+  mutation($post: PostInput!) {
+    downvote(post: $post) {
       id
-      title
-      votes
+      value
     }
   }
 `;
 
 export const MUTATION_DELETE_POST = gql`
-  mutation($id: ID!) {
-    delete(id: $id) {
+  mutation($post: PostInput!) {
+    delete(post: $post) {
       id
       title
-      votes
     }
   }
 `;

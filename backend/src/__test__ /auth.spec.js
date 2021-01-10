@@ -1,6 +1,7 @@
 import { createTestClient } from 'apollo-server-testing';
 import Server from '../server.js';
 import { ApolloServer } from 'apollo-server';
+import ServerContext from '../context';
 
 import {
   MUTATION_LOGIN,
@@ -13,14 +14,12 @@ import {
 let query;
 let mutate;
 let contextMock = {};
-let reqMock = {};
-let resMock = {};
 
 describe('auth', () => {
   let db;
 
   beforeEach(async () => {
-    contextMock = { req: reqMock, res: resMock };
+    contextMock = {};
     const server = await Server(ApolloServer, { context: () => contextMock });
     const testClient = createTestClient(server);
     // eslint-disable-next-line no-unused-vars
@@ -56,8 +55,9 @@ describe('auth', () => {
   });
 
   describe('register', () => {
-    it.only('can register a new user', async () => {
+    it('can register a new user', async () => {
       const email = `test_${Date.now()}@example.com`;
+      console.log('email', email);
 
       const {
         data: { signup },
@@ -72,10 +72,12 @@ describe('auth', () => {
 
       expect(signup).toContain('Bearer');
 
-      console.log('signup: ' + signup);
       // clanup
-
-      reqMock = { headers: { authorization: signup } };
+      contextMock = ServerContext({
+        req: {
+          headers: { authorization: signup },
+        },
+      });
 
       const deleteResponse = await mutate({
         mutation: MUTATION_DELETE_ACCOUNT,
@@ -84,7 +86,8 @@ describe('auth', () => {
         },
       });
 
-      console.log('deleteResponse', deleteResponse);
+      console.log(deleteResponse);
+      expect(deleteResponse.errors).toBeUndefined();
     });
 
     it('can not register a user if the email is already taken', async () => {
@@ -131,8 +134,7 @@ describe('auth', () => {
         },
       });
 
-      expect(errors[0].message).toContain('400');
-      expect(errors[0].extensions.invalidArgs).toContain('[Validation Errors]');
+      expect(errors[0].message).toContain('[Validation Errors]');
     });
   });
 });

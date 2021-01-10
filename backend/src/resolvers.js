@@ -104,11 +104,6 @@ export default ([{ schema, executor }]) => ({
 
     /**
      * Create for testing
-     *
-     * @param {*} _parent
-     * @param {*} _args
-     * @param {*} context
-     * @param {*} info
      */
     deleteAccount: async (_parent, _args, context, info) => {
       console.log('deleteAccount', context.person);
@@ -282,6 +277,7 @@ export default ([{ schema, executor }]) => ({
         },
       } = await executor({
         document: DELETE_MANY_VOTES,
+        variables: { postId: args.post.id }
       });
 
       console.log('deletedCount', pageInfo.pageSize);
