@@ -1,29 +1,20 @@
-# VueJS
-[![Actions Status](https://github.com/Systems-Development-and-Frameworks/dirty_thirties/workflows/CI/badge.svg)](https://github.com/Systems-Development-and-Frameworks/dirty_thirties/actions)
+# dirtythierties
 
-Due date: **28.10.2020**
+## Build Setup
 
-<p align="center">
-  <img src="https://miro.medium.com/max/1400/1*WNPicrz6DJegizpj4VY58Q.jpeg" alt="vue" width="65%">
-<p>
+```bash
+# install dependencies
+$ npm install
 
-## Goal
+# serve with hot reload at localhost:3000
+$ npm run dev
 
-The goal is to reimplement some basic functionalities of [Hackernews](https://news.ycombinator.com/) in VueJS to learn the concepts.
+# build for production and launch server
+$ npm run build
+$ npm run start
 
-Hacker News is a social news website focusing on computer science and entrepreneurship. Content can be submitted by users and can be interacted via upvotes or comments. 
-
-## setup of the project - installation
-```
-npm install
-```
-
-## npm please run serve command
-```
-npm run serve
+# generate static project
+$ npm run generate
 ```
 
-## Stylus (not used in the end)
-```
-npm install -D stylus-loader stylus
-```
+For detailed explanation on how things work, check out [Nuxt.js docs](https://nuxtjs.org).
