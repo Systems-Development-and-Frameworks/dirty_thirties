@@ -1,13 +1,16 @@
-import { rule, shield, allow } from 'graphql-shield';
-import { verifyToken } from './../utils/jwt';
+import { rule, shield, allow, deny } from 'graphql-shield';
+
+import { ForbiddenError } from 'apollo-server';
 
 // Rules
-const isAuthenticated = rule({ cache: 'contextual' })(
-  async (parent, args, ctx) => {
+/*
+const isAuthenticated = rule({ cache: 'no_cache' })(
+  async (parent, args, ctx, info) => {
     let token = ctx.req.headers.authorization;
 
     try {
       const decodedUser = verifyToken(token);
+
       const user = ctx.dataSources.db.getUser(decodedUser.id);
 
       if (user) {
@@ -17,46 +20,51 @@ const isAuthenticated = rule({ cache: 'contextual' })(
     } catch (error) {
       return false;
     }
+
     return false;
   }
 );
+*/
 
-const isOwner = rule({ cache: 'contextual' })(async (parent, args, ctx) => {
-  let token = ctx.req.headers.authorization;
-
-  try {
-    const decodedUser = verifyToken(token);
-
-    const user = ctx.dataSources.db.getUser(decodedUser.id);
-    const post = ctx.dataSources.db.getPost(args.id);
-
-    if (user && post) {
-      ctx.req.auth = user;
-      return post.authorid === user.id;
+const isAuthenticated = rule({ cache: 'contextual' })(
+  async (_parent, _args, context) => {
+    if (context.person == undefined) {
+      return 'Not Authorised!';
     }
-  } catch (error) {
-    return false;
+    return !!context.person.id;
   }
+);
 
-  return false;
-});
 
 // Permissions
 const permissions = shield(
   {
     Query: {
-        users: isAuthenticated,
+      //users: isAuthenticated,
+      '*': deny,
+      profile: isAuthenticated,
+      posts: allow,
+      post: allow,
+      people: allow,
+      person: allow,
     },
     Mutation: {
+      '*': deny,
+      // auth
+      login: allow,
+      signup: allow,
+      deleteAccount: isAuthenticated,
+
       write: isAuthenticated,
-     upvote: isAuthenticated,
-     downvote: isAuthenticated,
-     delete: isOwner,
+      upvote: isAuthenticated,
+      downvote: isAuthenticated,
+      delete: isAuthenticated,
     },
   },
   {
     debug: true,
     fallbackRule: allow,
+    fallbackError: new ForbiddenError('Not Authorised!'),
   }
 );
 

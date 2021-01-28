@@ -127,4 +127,11 @@ dist
 # Stores VSCode versions used for testing VSCode extensions
 .vscode-test
 
+#git-crypt
+.git-crypt-key
+
+# local env files
+.env.local
+.env.*.local
+
 # End of https://www.toptal.com/developers/gitignore/api/node

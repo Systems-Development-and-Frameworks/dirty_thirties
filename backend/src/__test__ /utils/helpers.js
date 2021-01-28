@@ -5,9 +5,7 @@ export const loginUser = async (
   email = 'sarah@email.com',
   password = 'marzipan'
 ) => {
-  const {
-    data,
-  } = await mutate({
+  const { data } = await mutate({
     mutation: MUTATION_LOGIN,
     variables: { email, password },
   });

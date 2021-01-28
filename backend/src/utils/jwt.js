@@ -1,14 +1,12 @@
-require('dotenv').config();
+import { JWT_SECRET } from './../config';
 import jwt from 'jsonwebtoken';
 
-const LOCAL_JWT_KEY = "a20e136e4925467fca61e3f17fabf8de58d7087f";
-
-export const createTokenFor = (user) => {
+export const createTokenFor = (userId) => {
   return jwt.sign(
     {
-      id: user.id,
+      id: userId,
     },
-    process.env.JWT_KEY || LOCAL_JWT_KEY,
+    JWT_SECRET,
     { algorithm: 'HS256' }
   );
 };
@@ -17,7 +15,7 @@ export const verifyToken = (token) => {
   const cleanedUpToken = token.startsWith('Bearer')
     ? token.replace('Bearer ', '')
     : token;
-  return jwt.verify(cleanedUpToken, process.env.JWT_KEY || LOCAL_JWT_KEY, {
+  return jwt.verify(cleanedUpToken, JWT_SECRET, {
     algorithm: 'HS256',
   });
 };

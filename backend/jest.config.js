@@ -16,6 +16,9 @@ module.exports = {
   // Automatically clear mock calls and instances between every test
   clearMocks: true,
 
+   // increase the default timeout (5000ms)
+   testTimeout: 90000,
+
   // Indicates whether the coverage information should be collected while executing the test
   // collectCoverage: false,
 
