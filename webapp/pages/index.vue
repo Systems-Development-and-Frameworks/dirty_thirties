@@ -2,7 +2,7 @@
   <div class="container">
     <div>
       <Logo />
-      <h1 class="title">dirtythierties</h1>
+      <h1 class="title">dirtythirties</h1>
       <div class="links">
         <a
           href="https://nuxtjs.org/"
