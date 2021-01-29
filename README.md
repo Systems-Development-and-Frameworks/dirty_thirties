@@ -20,14 +20,17 @@ This README is created to share and publish our homework for Systems Development
 
 Exercise 7 How to build Webapp for production: 
 
-# install dependencies
-npm install
+install dependencies
 
-# serve with hot reload at localhost:3000
-npm dev (all PWA functions are not supported)
+$npm install
 
-# build for production and launch server
-npm generate
-npm build
-npm start
+serve with hot reload at localhost:3000
+
+$npm dev
+
+build for production and launch server
+
+$npm generate
+$npm build
+$npm start
 
